@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>AQL Inspection Tracker Pro</title>
   
-  <link rel="manifest" href='data:application/manifest+json,{"name":"AQL Inspection Tracker Pro","short_name":"AQL Tracker","description":"Base de dados e triagem operacional de inspeção de engenharia de qualidade.","start_url":".","display":"standalone","background_color":"%23F8F9FA","theme_color":"%232196F3","orientation":"portrait","icons":[{"src":"https://cdn.jsdelivr.net/npm/@tabler/icons-png@latest/icons/database.png","sizes":"512x512","type":"image/png"}]}'>
+  <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkFRTCBJbnNwZWN0aW9uIFRyYWNrZXIgUHJvIiwKICAic2hvcnRfbmFtZSI6ICJBUUwgVHJhY2tlciIsCiAgImRlc2NyaXB0aW9uIjogIkJhc2UgZGUgZGFkb3MgZSB0cmlhZ2VtIG9wZXJhY2lvbmFsIGRlIGluc3Blw6fDo28gZGUgZW5nZW5oYXJpYSBkZSBxdWFsaWRhZGUuIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNGOEY5RkEiLAogICJ0aGVtZV9jb2xvciI6ICIjMjE5NkYzIiwKICAib3JpZW50YXRpb24iOiAicG9ydHJhaXQiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL2Nkbi5qc2RlbGl2ci5uZXQvbnBtL0B0YWJsZXIvaWNvbnMtcG5nQGxhdGVzdC9pY29ucy9kYXRhYmFzZS5wbmciLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSIKICAgIH0KICBdCn0=">
+  
   <meta name="theme-color" content="#2196F3">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,7 +15,7 @@
   
   <style>
     /* ==========================================================================
-       SEÇÃO CSS: VARIÁVEIS DE COR (MATERIAL DESIGN 3)
+       VARIÁVEIS DE COR & DESIGN SYSTEM (MATERIAL DESIGN 3)
        ========================================================================== */
     :root {
       --md-sys-color-primary: #2196F3;
@@ -36,7 +37,7 @@
     }
 
     /* ==========================================================================
-       SEÇÃO CSS: RESETS E ESTRUTURA GLOBAL
+       ESTRUTURA GLOBAL & RESETS
        ========================================================================== */
     * {
       box-sizing: border-box;
@@ -47,7 +48,7 @@
 
     body {
       background-color: var(--md-sys-color-surface);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       color: var(--md-text-primary);
       padding: 16px;
       display: flex;
@@ -60,9 +61,8 @@
     }
 
     /* ==========================================================================
-       SEÇÃO CSS: COMPONENTES DE INTERFACE (UI)
+       COMPONENTES DE INTERFACE (UI)
        ========================================================================== */
-    /* Cabeçalho Principal (Header) */
     .hdr {
       display: flex;
       align-items: center;
@@ -85,7 +85,6 @@
     .hdr-text h1 {
       font-size: 20px;
       font-weight: 600;
-      color: var(--md-text-primary);
       letter-spacing: -0.2px;
     }
     .hdr-text p {
@@ -93,7 +92,6 @@
       color: var(--md-text-secondary);
     }
 
-    /* Cartões Estruturais (Cards) */
     .card {
       background: var(--md-sys-color-surface-variant);
       border: 1px solid var(--md-sys-color-outline);
@@ -117,7 +115,6 @@
       color: var(--md-text-secondary);
     }
 
-    /* Grelhas, Formulários e Inputs */
     .form-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -165,7 +162,6 @@
       padding-right: 32px;
     }
 
-    /* FMEA Grid & Seletores Incrementais (Steppers) */
     .sod-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -221,7 +217,6 @@
     }
     .sod-stepper button:active { background: #E2E6EA; }
 
-    /* Painel de Resultados, Métricas e Indicadores */
     .result-body { padding: 18px 16px; }
     .cat-pill {
       display: inline-flex;
@@ -256,7 +251,6 @@
     .met-val { font-size: 20px; font-weight: 700; color: var(--md-text-primary); }
     .met-unit { font-size: 11px; font-weight: 500; color: var(--md-text-secondary); }
 
-    /* Módulo Operacional de Triagem */
     .triagem-body { padding: 16px; }
     .triagem-row {
       display: flex;
@@ -329,7 +323,6 @@
     }
     .btn-submit:active { opacity: 0.9; }
 
-    /* Histórico / Tabela de Dados Local */
     .table-container {
       overflow-x: auto;
       padding: 0 16px 16px;
@@ -367,15 +360,15 @@
 <body>
 
 <div class="app">
-  <div class="hdr">
+  <header class="hdr">
     <div class="hdr-icon"><i class="ti ti-database"></i></div>
     <div class="hdr-text">
       <h1>AQL Inspector Tracker</h1>
       <p>Base de dados e triagem operacional</p>
     </div>
-  </div>
+  </header>
 
-  <div class="card">
+  <section class="card">
     <div class="card-hdr"><span>Parâmetros de Qualidade & FMEA</span></div>
     <div class="sod-grid">
       <div class="sod-cell">
@@ -419,18 +412,18 @@
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <div class="card" id="result-card">
+  <section class="card" id="result-card">
     <div class="card-hdr"><span>Identificação de Categoria & Plano AQL</span></div>
     <div class="result-body">
       <div class="cat-pill" id="cat-pill"></div>
       <p class="result-msg" id="result-msg"></p>
       <div class="metrics" id="metrics" style="display:none;"></div>
     </div>
-  </div>
+  </section>
 
-  <div class="card">
+  <section class="card">
     <div class="card-hdr"><span>Identificação & Status do Item</span></div>
     <div class="form-grid">
       <div class="form-row-2">
@@ -471,9 +464,9 @@
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <div class="card" id="triagem-card" style="display: none;">
+  <section class="card" id="triagem-card" style="display: none;">
     <div class="card-hdr"><span>Triagem & Indicadores Operacionais</span></div>
     <div class="triagem-body">
       <div class="triagem-row">
@@ -499,11 +492,11 @@
         </div>
       </div>
       <div id="triagem-status-banner" class="status-banner"></div>
-      <button class="btn-submit" onclick="salvarRegistro()"><i class="ti ti-device-floppy"></i> Salvar e Registar no Tracker</button>
+      <button class="btn-submit" onclick="salvarRegistro()"><i class="ti ti-device-floppy"></i> Salvar e Registrar no Tracker</button>
     </div>
-  </div>
+  </section>
 
-  <div class="card">
+  <section class="card">
     <div class="card-hdr"><span>Base de Dados Real-Time (Histórico)</span></div>
     <div class="table-container">
       <table class="db-table">
@@ -523,49 +516,12 @@
         <tbody id="db-rows"></tbody>
       </table>
     </div>
-  </div>
+  </section>
 </div>
 
 <script>
   /* ==========================================================================
-     SEÇÃO JS: MECANISMO INTERNO DO PWA (AUTO-GERAÇÃO DO SERVICE WORKER)
-     ========================================================================== */
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      // Cria o código do Service Worker dinamicamente para manter tudo num único ficheiro!
-      const swCode = `
-        const CACHE_NAME = 'aql-tracker-single-v1';
-        const ASSETS = [
-          location.href,
-          'https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css'
-        ];
-
-        self.addEventListener('install', (e) => {
-          e.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(ASSETS)));
-        });
-
-        self.addEventListener('activate', (e) => {
-          e.waitUntil(caches.keys().then((keys) => Promise.all(
-            keys.map((k) => { if(k !== CACHE_NAME) return caches.delete(k); })
-          )));
-        });
-
-        self.addEventListener('fetch', (e) => {
-          e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request)));
-        });
-      `;
-
-      const blob = new Blob([swCode], { type: 'application/javascript' });
-      const swUrl = URL.createObjectURL(blob);
-
-      navigator.serviceWorker.register(swUrl)
-        .then(reg => console.log('PWA: Service Worker em linha registado com sucesso!'))
-        .catch(err => console.error('PWA: Falha ao registar o Service Worker:', err));
-    });
-  }
-
-  /* ==========================================================================
-     SEÇÃO JS: ENGENHARIA DE CÁLCULO E MOTOR DE REGRAS (AQL / FMEA)
+     FICHEIRO 2 EMBUTIDO: ENGENHARIA DE CÁLCULO E MOTOR DE REGRAS (AQL / FMEA)
      ========================================================================== */
   document.getElementById('date-inicio').valueAsDate = new Date();
 
@@ -578,28 +534,28 @@
     "294324PM0A": { supplier: "EGANA 2 S.L.", desc: "HSG ASSY-TRACTION MOTOR CLOSING PARTIAL", defect: "Sealing Surface Integrity", method: "Visual Control" }
   };
 
-  const DB=[
-    {min:1,   s:32, a25:1,r25:2,a15:0,r15:1,a10:0,r10:1},
-    {min:200, s:50, a25:2,r25:3,a15:1,r15:2,a10:0,r10:1},
-    {min:500, s:80, a25:3,r25:4,a15:2,r15:3,a10:1,r10:2},
-    {min:1200,s:125,a25:5,r25:6,a15:3,r15:4,a10:2,r10:3},
-    {min:3200,s:200,a25:7,r25:8,a15:5,r15:6,a10:3,r10:4},
+  const DB = [
+    { min: 1,    s: 32,  a25: 1, r25: 2, a15: 0, r15: 1, a10: 0, r10: 1 },
+    { min: 200,  s: 50,  a25: 2, r25: 3, a15: 1, r15: 2, a10: 0, r10: 1 },
+    { min: 500,  s: 80,  a25: 3, r25: 4, a15: 2, r15: 3, a10: 1, r10: 2 },
+    { min: 1200, s: 125, a25: 5, r25: 6, a15: 3, r15: 4, a10: 2, r10: 3 },
+    { min: 3200, s: 200, a25: 7, r25: 8, a15: 5, r15: 6, a10: 3, r10: 4 }
   ];
 
   let limiteRejeitar = 0;
   let tamanhoAmostraCorrente = 0;
 
-  function lookup(lot){
-    let r=DB[0];
-    for(const x of DB){ if(lot>=x.min) r=x; else break; }
+  function lookup(lot) {
+    let r = DB[0];
+    for (const x of DB) { if (lot >= x.min) r = x; else break; }
     return r;
   }
   
-  function clamp(v,a,b){ return Math.min(Math.max(v,a),b); }
+  function clamp(v, a, b) { return Math.min(Math.max(v, a), b); }
   
-  function step(id,d){
-    const el=document.getElementById(id);
-    el.value=clamp((+el.value||1)+d,1,10);
+  function step(id, d) {
+    const el = document.getElementById(id);
+    el.value = clamp((+el.value || 1) + d, 1, 10);
     calc();
   }
 
@@ -636,54 +592,54 @@
     }
   }
 
-  function calc(){
-    const S=clamp(+document.getElementById('sev').value||1,1,10);
-    const O=clamp(+document.getElementById('occ').value||1,1,10);
-    const D=clamp(+document.getElementById('det').value||1,1,10);
-    const lot=Math.max(+document.getElementById('lot').value||1,1);
-    const hist=document.getElementById('hist').value;
-    const rpn=S*O*D;
+  function calc() {
+    const S = clamp(+document.getElementById('sev').value || 1, 1, 10);
+    const O = clamp(+document.getElementById('occ').value || 1, 1, 10);
+    const D = clamp(+document.getElementById('det').value || 1, 1, 10);
+    const lot = Math.max(+document.getElementById('lot').value || 1, 1);
+    const hist = document.getElementById('hist').value;
+    const rpn = S * O * D;
     
-    const cat=rpn>=50||S===10?'A':rpn<36?'C':'B';
-    const pill=document.getElementById('cat-pill');
-    const msg=document.getElementById('result-msg');
-    const rc=document.getElementById('result-card');
-    const met=document.getElementById('metrics');
+    const cat = rpn >= 50 || S === 10 ? 'A' : rpn < 36 ? 'C' : 'B';
+    const pill = document.getElementById('cat-pill');
+    const msg = document.getElementById('result-msg');
+    const rc = document.getElementById('result-card');
+    const met = document.getElementById('metrics');
     const triagemCard = document.getElementById('triagem-card');
     
-    if(cat==='A'){
-      pill.style.cssText='background:var(--color-danger-bg); color:var(--color-danger);';
-      pill.innerHTML='<i class="ti ti-alert-triangle"></i> Categoria A — Alto Risco';
-      rc.style.borderColor='var(--color-danger)';
-      msg.textContent='Aviso: RPN elevado ou falha crítica. Categoria A. Prosseguir com inspeção a 100% de todo o lote.';
-      met.style.display='none';
+    if (cat === 'A') {
+      pill.style.cssText = 'background:var(--color-danger-bg); color:var(--color-danger);';
+      pill.innerHTML = '<i class="ti ti-alert-triangle"></i> Categoria A — Alto Risco';
+      rc.style.borderColor = 'var(--color-danger)';
+      msg.textContent = 'Aviso: RPN elevado ou falha crítica. Categoria A. Prosseguir com inspeção a 100% de todo o lote.';
+      met.style.display = 'none';
       triagemCard.style.display = 'none';
-    } else if(cat==='C'){
-      pill.style.cssText='background:var(--color-success-bg); color:var(--color-success);';
-      pill.innerHTML='<i class="ti ti-circle-check"></i> Categoria C — Baixo Risco';
-      rc.style.borderColor='var(--color-success)';
-      msg.textContent='Baixo risco: Categoria C. Prosseguir com uma auditoria por amostragem (1 a 2 meses).';
-      met.style.display='none';
+    } else if (cat === 'C') {
+      pill.style.cssText = 'background:var(--color-success-bg); color:var(--color-success);';
+      pill.innerHTML = '<i class="ti ti-circle-check"></i> Categoria C — Baixo Risco';
+      rc.style.borderColor = 'var(--color-success)';
+      msg.textContent = 'Baixo risco: Categoria C. Prosseguir com uma auditoria por amostragem (1 a 2 meses).';
+      met.style.display = 'none';
       triagemCard.style.display = 'none';
     } else {
-      const aql=hist==='Normal'?'2.5':hist==='NCs Menores'?'1.5':'1.0';
-      const row=lookup(lot);
-      const sm=row.s;
-      const ac=aql==='2.5'?row.a25:aql==='1.5'?row.a15:row.a10;
-      const re=aql==='2.5'?row.r25:aql==='1.5'?row.r15:row.r10;
+      const aql = hist === 'Normal' ? '2.5' : hist === 'NCs Menores' ? '1.5' : '1.0';
+      const row = lookup(lot);
+      const sm = row.s;
+      const ac = aql === '2.5' ? row.a25 : aql === '1.5' ? row.a15 : row.a10;
+      const re = aql === '2.5' ? row.r25 : aql === '1.5' ? row.r15 : row.r10;
       
       limiteRejeitar = re;
       tamanhoAmostraCorrente = sm;
 
       document.getElementById('total-inspecionado').value = sm;
 
-      pill.style.cssText='background:var(--color-info-bg); color:var(--color-info);';
-      pill.innerHTML='<i class="ti ti-info-circle"></i> Categoria B — Risco Moderado';
-      rc.style.borderColor='var(--color-info)';
-      msg.textContent='Plano AQL dinâmico estabelecido. Realize a triagem e insira as peças reprovadas abaixo.';
+      pill.style.cssText = 'background:var(--color-info-bg); color:var(--color-info);';
+      pill.innerHTML = '<i class="ti ti-info-circle"></i> Categoria B — Risco Moderado';
+      rc.style.borderColor = 'var(--color-info)';
+      msg.textContent = 'Plano AQL dinâmico estabelecido. Realize a triagem e insira as peças reprovadas abaixo.';
       
-      met.style.display='grid';
-      met.innerHTML=`
+      met.style.display = 'grid';
+      met.innerHTML = `
         <div class="met"><span class="met-lbl">Nível AQL</span><span class="met-val">${aql}<span class="met-unit"> %</span></span></div>
         <div class="met"><span class="met-lbl">Amostra</span><span class="met-val">${sm}<span class="met-unit"> pcs</span></span></div>
         <div class="met"><span class="met-lbl">Aceitar (Ac)</span><span class="met-val" style="color:var(--color-success)">≤ ${ac}<span class="met-unit"> def.</span></span></div>
@@ -695,15 +651,12 @@
     }
   }
 
-  /* ==========================================================================
-     SEÇÃO JS: REPOSITÓRIO LOCAL DE REGISTROS (LOCALSTORAGE)
-     ========================================================================== */
   function carregarBancoDados() {
     const dados = JSON.parse(localStorage.getItem('aql_tracker_db')) || [];
     const tbody = document.getElementById('db-rows');
     tbody.innerHTML = '';
 
-    if(dados.length === 0) {
+    if (dados.length === 0) {
       tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:gray; padding:20px;">Nenhum registro salvo na base de dados local.</td></tr>';
       return;
     }
@@ -731,7 +684,7 @@
     const pNumber = document.getElementById('part-number').value.trim();
     const splier = document.getElementById('supplier').value.trim();
 
-    if(!pNumber || !splier) {
+    if (!pNumber || !splier) {
       alert("Por favor, preencha pelo menos o Part Number e o Supplier antes de salvar.");
       return;
     }
@@ -767,7 +720,51 @@
     calc();
   }
 
-  // Inicialização do Sistema
+  /* ==========================================================================
+     FICHEIRO 3 EMBUTIDO: SERVICE WORKER EM LINHA (INLINE BLOB GENERATOR)
+     ========================================================================== */
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      // String contendo toda a lógica do Service Worker
+      const swCode = `
+        const CACHE_NAME = 'aql-tracker-single-v1';
+        const ASSETS = [
+          location.href,
+          'https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css'
+        ];
+
+        self.addEventListener('install', (e) => {
+          e.waitUntil(
+            caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+          );
+        });
+
+        self.addEventListener('activate', (e) => {
+          e.waitUntil(
+            caches.keys().then((keys) => Promise.all(
+              keys.map((k) => { if(k !== CACHE_NAME) return caches.delete(k); })
+            ))
+          );
+        });
+
+        self.addEventListener('fetch', (e) => {
+          e.respondWith(
+            caches.match(e.request).then((res) => res || fetch(e.request))
+          );
+        });
+      `;
+
+      // Conversão em tempo de execução para ficheiro virtual JavaScript
+      const blob = new Blob([swCode], { type: 'application/javascript' });
+      const swUrl = URL.createObjectURL(blob);
+
+      navigator.serviceWorker.register(swUrl)
+        .then(reg => console.log('PWA: Service Worker interno ativo e configurado com sucesso!'))
+        .catch(err => console.error('PWA: Falha na montagem do Service Worker virtual:', err));
+    });
+  }
+
+  // Inicialização Inicial da Aplicação
   calc();
   carregarBancoDados();
 </script>

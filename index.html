@@ -655,14 +655,14 @@
       pill.style.cssText='background:var(--color-danger-bg); color:var(--color-danger);';
       pill.innerHTML='<i class="ti ti-alert-triangle"></i> Categoria A — Alto Risco';
       rc.style.borderColor='var(--color-danger)';
-      msg.textContent='⚠️ Aviso: RPN elevado ou falha crítica. Categoria A. Prosseguir com inspeção a 100% de todo o lote.';
+      msg.textContent='Aviso: RPN elevado ou falha crítica. Categoria A. Prosseguir com inspeção a 100% de todo o lote.';
       met.style.display='none';
       triagemCard.style.display = 'none';
     } else if(cat==='C'){
       pill.style.cssText='background:var(--color-success-bg); color:var(--color-success);';
       pill.innerHTML='<i class="ti ti-circle-check"></i> Categoria C — Baixo Risco';
       rc.style.borderColor='var(--color-success)';
-      msg.textContent='✅ Baixo risco: Categoria C. Prosseguir com uma auditoria por amostragem (1 a 2 meses).';
+      msg.textContent='Baixo risco: Categoria C. Prosseguir com uma auditoria por amostragem (1 a 2 meses).';
       met.style.display='none';
       triagemCard.style.display = 'none';
     } else {
@@ -680,7 +680,7 @@
       pill.style.cssText='background:var(--color-info-bg); color:var(--color-info);';
       pill.innerHTML='<i class="ti ti-info-circle"></i> Categoria B — Risco Moderado';
       rc.style.borderColor='var(--color-info)';
-      msg.textContent='ℹ️ Plano AQL dinâmico estabelecido. Realize a triagem e insira as peças reprovadas abaixo.';
+      msg.textContent='Plano AQL dinâmico estabelecido. Realize a triagem e insira as peças reprovadas abaixo.';
       
       met.style.display='grid';
       met.innerHTML=`

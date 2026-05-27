@@ -322,7 +322,6 @@
     }
     .btn-submit:active { opacity: 0.9; }
 
-    /* ESTILOS NOVOS PARA OS BOTÕES DE LIMPAR/APAGAR */
     .btn-clear-all {
       background: var(--color-danger-bg);
       color: var(--color-danger);
@@ -485,7 +484,20 @@
       <div class="form-row-2">
         <div class="input-group">
           <label for="hist-defeito">Histórico de Defeito</label>
-          <input type="text" id="hist-defeito" class="form-control" placeholder="Ex: Broken Pin">
+          <input type="text" id="hist-defeito" list="lista-defeitos-sugeridos" class="form-control" placeholder="Selecione ou escreva novo...">
+          <datalist id="lista-defeitos-sugeridos">
+            <option value="Broken Pin">
+            <option value="Deformated / Bent">
+            <option value="Burr / Flashes">
+            <option value="Scratches / Surface Damage">
+            <option value="Contamination / Dirty">
+            <option value="Conductivity Variation">
+            <option value="Dimensional Non-Compliance">
+            <option value="Cracks / Fissures">
+            <option value="Terminal/Clip Non-Compliance">
+            <option value="Sealing Surface Integrity">
+            <option value="Oxidation / Rust">
+          </datalist>
         </div>
         <div class="input-group">
           <label for="metodo-inspecao">Método de Inspeção</label>
@@ -554,7 +566,7 @@
 
 <script>
   /* ==========================================================================
-     FICHEIRO 2 EMBUTIDO: ENGENHARIA DE CÁLCULO E MOTOR DE REGRAS (AQL / FMEA)
+     MOTOR DE CÁLCULO, REGRAS AQL & LOGICA DE OPERAÇÃO
      ========================================================================== */
   document.getElementById('date-inicio').valueAsDate = new Date();
 
@@ -744,6 +756,7 @@
       rejected: +document.getElementById('total-rejeitado').value || 0
     };
 
+    // Atualiza base de dados de auto-preenchimento para este part number
     DADOS_CONHECIDOS[pNumber] = {
       supplier: splier,
       desc: descItem,
@@ -762,38 +775,30 @@
     calc();
   }
 
-  /* NOVAS FUNÇÕES DE EXCLUSÃO E LIMPEZA DE DADOS */
-
-  // 1. Eliminar registo individual com confirmação simples
   function eliminarRegistoIndividual(indexNoArray, idDoRegisto) {
     const confirmar = confirm(`Tem a certeza de que deseja eliminar o registo #${idDoRegisto}? Esta ação não pode ser desfeita.`);
     if (confirmar) {
       let dados = JSON.parse(localStorage.getItem('aql_tracker_db')) || [];
-      dados.splice(indexNoArray, 1); // Remove o item da lista pelo índice
+      dados.splice(indexNoArray, 1);
       localStorage.setItem('aql_tracker_db', JSON.stringify(dados));
-      carregarBancoDados(); // Atualiza a tabela
+      carregarBancoDados();
     }
   }
 
-  // 2. Limpar todo o histórico usando o sistema de DUPLA CONFIRMAÇÃO
   function limparHistoricoCompleto() {
-    // Primeira Confirmação
     const primeiraConfirmacao = confirm("⚠️ ATENÇÃO: Deseja realmente APAGAR TODO o histórico de inspeções do Tracker?");
-    
     if (primeiraConfirmacao) {
-      // Segunda Confirmação (Dupla Confirmação de segurança)
       const segundaConfirmacao = confirm("CUIDADO! Esta ação é irreversível. Todos os registos guardados na tabela real-time serão destruídos permanentemente. Continuar?");
-      
       if (segundaConfirmacao) {
-        localStorage.removeItem('aql_tracker_db'); // Remove apenas a tabela de histórico
-        carregarBancoDados(); // Atualiza o ecrã
+        localStorage.removeItem('aql_tracker_db');
+        carregarBancoDados();
         alert("Base de dados de histórico limpa com sucesso!");
       }
     }
   }
 
   /* ==========================================================================
-     FICHEIRO 3 EMBUTIDO: SERVICE WORKER EM LINHA (INLINE BLOB GENERATOR)
+     SERVICE WORKER INTERNO (PWA)
      ========================================================================== */
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -803,38 +808,25 @@
           location.href,
           'https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css'
         ];
-
         self.addEventListener('install', (e) => {
-          e.waitUntil(
-            caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
-          );
+          e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));
         });
-
         self.addEventListener('activate', (e) => {
-          e.waitUntil(
-            caches.keys().then((keys) => Promise.all(
-              keys.map((k) => { if(k !== CACHE_NAME) return caches.delete(k); })
-            ))
-          );
+          e.waitUntil(caches.keys().then((keys) => Promise.all(
+            keys.map((k) => { if(k !== CACHE_NAME) return caches.delete(k); })
+          )));
         });
-
         self.addEventListener('fetch', (e) => {
-          e.respondWith(
-            caches.match(e.request).then((res) => res || fetch(e.request))
-          );
+          e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request)));
         });
       `;
-
       const blob = new Blob([swCode], { type: 'application/javascript' });
       const swUrl = URL.createObjectURL(blob);
-
-      navigator.serviceWorker.register(swUrl)
-        .then(reg => console.log('PWA: Service Worker interno ativo!'))
-        .catch(err => console.error('PWA: Erro no SW virtual:', err));
+      navigator.serviceWorker.register(swUrl).catch(err => console.error('PWA Error:', err));
     });
   }
 
-  // Inicialização
+  // Inicialização do App
   calc();
   carregarBancoDados();
 </script>

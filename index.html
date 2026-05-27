@@ -2,18 +2,58 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>AQL Inspection Tracker Pro</title>
   
-  <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkFRTCBJbnNwZWN0aW9uIFRyYWNrZXIgUHJvIiwKICAic2hvcnRfbmFtZSI6ICJBUUwgVHJhY2tlciIsCiAgImRlcmlwdGlvbiI6ICJCYXNlIGRlIGRhZG9zIGUgdHJpYWgelW0gb3BlcmFjaW9uYWwgZGUgaW5zcGVnw6PbyBkZSBlbmdlbmhhcmlhIGRlIHF1YWxpZGFkZS4iLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI0Y4RjlGQSIsCiAgInRoZW1lX2NvbG9yIjogIiMyMTk2RjMiLAogICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vZ2l0aHViLmNvbS91c2VyLWF0dGFjaG1lbnRzL2Fzc2V0cy83ODc5MDA3MS05M2YyLTRkZTctOGRiNC1kY2I4Y2MyOGI0NWIiLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXMaskYWJsZSIsCiAgICAgICJmb3JjZV9kb3duaG9hZCI6IGZhbHNlCiAgICB9CiAgXQp9">
-  
+  <link id="manifest-placeholder" rel="manifest" href="">
+
   <meta name="theme-color" content="#2196F3">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
   
   <style>
+    :root { --primary: #2196F3; --bg: #F8F9FA; --text: #2D3436; --card: #FFFFFF; }
+    body { font-family: sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; }
+    .card { background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>AQL Inspection Tracker</h1>
+    <p>Status: <span id="status">Carregando...</span></p>
+  </div>
+
+  <script>
+    // 1. Criar e injetar o manifesto via Blob para evitar problemas de bloqueio
+    const manifest = {
+      "name": "AQL Inspection Tracker Pro",
+      "short_name": "AQL Tracker",
+      "display": "standalone",
+      "start_url": window.location.href,
+      "background_color": "#F8F9FA",
+      "theme_color": "#2196F3",
+      "icons": [{
+        "src": "https://cdn-icons-png.flaticon.com/512/2921/2921222.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }]
+    };
+    const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+    document.querySelector('#manifest-placeholder').href = URL.createObjectURL(blob);
+
+    // 2. Registrar Service Worker "in-memory" para permitir instalação
+    if ('serviceWorker' in navigator) {
+      const swCode = `self.addEventListener('fetch', () => {});`;
+      const blobSW = new Blob([swCode], {type: 'application/javascript'});
+      navigator.serviceWorker.register(URL.createObjectURL(blobSW))
+        .then(() => document.getElementById('status').innerText = "Pronto para instalar!")
+        .catch(err => console.error(err));
+    }
+  </script>
+</body>
+</html>
     /* ==========================================================================
        VARIÁVEIS DE COR & DESIGN SYSTEM (MATERIAL DESIGN 3)
        ========================================================================== */

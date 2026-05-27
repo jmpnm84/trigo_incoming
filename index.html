@@ -5,7 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>AQL Inspection Tracker Pro</title>
   
-  <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkFRTCBJbnNwZWN0aW9uIFRyYWNrZXIgUHJvIiwKICAic2hvcnRfbmFtZSI6ICJBUUwgVHJhY2tlciIsCiAgImRlc2NyaXB0aW9uIjogIkJhc2UgZGUgZGFkb3MgZSB0cmlhZ2VtIG9wZXJhY2lvbmFsIGRlIGluc3Blw6fDo28gZGUgZW5nZW5oYXJpYSBkZSBxdWFsaWRhZGUuIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNGOEY5RkEiLAogICJ0aGVtZV9jb2xvciI6ICIjMjE5NkYzIiwKICAib3JpZW50YXRpb24iOiAicG9ydHJhaXQiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL2Nkbi5qc2RlbGl2ci5uZXQvbnBtL0B0YWJsZXIvaWNvbnMtcG5nQGxhdGVzdC9pY29ucy9kYXRhYmFzZS5wbmciLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSIKICAgIH0KICBdCn0=">
+  <link rel="manifest" href="data:application/json;charset=utf-8,{
+    &quot;name&quot;: &quot;AQL Inspection Tracker Pro&quot;,
+    &quot;short_name&quot;: &quot;AQL Tracker&quot;,
+    &quot;description&quot;: &quot;Base de dados e triagem operacional de inspeção de engenharia de qualidade.&quot;,
+    &quot;start_url&quot;: &quot;.&quot;,
+    &quot;display&quot;: &quot;standalone&quot;,
+    &quot;background_color&quot;: &quot;#F8F9FA&quot;,
+    &quot;theme_color&quot;: &quot;#2196F3&quot;,
+    &quot;orientation&quot;: &quot;portrait&quot;,
+    &quot;icons&quot;: [
+      {
+        &quot;src&quot;: &quot;https://cdn.jsdelivr.net/npm/@tabler/icons-png@latest/icons/database.png&quot;,
+        &quot;sizes&quot;: &quot;512x512&quot;,
+        &quot;type&quot;: &quot;image/png&quot;,
+        &quot;purpose&quot;: &quot;any maskable&quot;
+      }
+    ]
+  }">
   
   <meta name="theme-color" content="#2196F3">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -521,7 +538,7 @@
 
 <script>
   /* ==========================================================================
-     FICHEIRO 2 EMBUTIDO: ENGENHARIA DE CÁLCULO E MOTOR DE REGRAS (AQL / FMEA)
+     ENGENHARIA DE CÁLCULO E MOTOR DE REGRAS (AQL / FMEA)
      ========================================================================== */
   document.getElementById('date-inicio').valueAsDate = new Date();
 
@@ -721,11 +738,11 @@
   }
 
   /* ==========================================================================
-     FICHEIRO 3 EMBUTIDO: SERVICE WORKER EM LINHA (INLINE BLOB GENERATOR)
+     SERVICE WORKER NATIVO DESENCRIPTADO (Para suporte Offline e PWA)
      ========================================================================== */
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      // String contendo toda a lógica do Service Worker
+      // Criação limpa do script do Service Worker sem criptografia Base64 ou emaranhados
       const swCode = `
         const CACHE_NAME = 'aql-tracker-single-v1';
         const ASSETS = [
@@ -754,17 +771,16 @@
         });
       `;
 
-      // Conversão em tempo de execução para ficheiro virtual JavaScript
       const blob = new Blob([swCode], { type: 'application/javascript' });
       const swUrl = URL.createObjectURL(blob);
 
       navigator.serviceWorker.register(swUrl)
-        .then(reg => console.log('PWA: Service Worker interno ativo e configurado com sucesso!'))
-        .catch(err => console.error('PWA: Falha na montagem do Service Worker virtual:', err));
+        .then(reg => console.log('PWA: Service Worker ativo com sucesso!'))
+        .catch(err => console.error('PWA: Falha ao carregar o Service Worker:', err));
     });
   }
 
-  // Inicialização Inicial da Aplicação
+  // Inicialização do App
   calc();
   carregarBancoDados();
 </script>

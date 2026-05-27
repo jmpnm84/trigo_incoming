@@ -322,6 +322,36 @@
     }
     .btn-submit:active { opacity: 0.9; }
 
+    /* ESTILOS NOVOS PARA OS BOTÕES DE LIMPAR/APAGAR */
+    .btn-clear-all {
+      background: var(--color-danger-bg);
+      color: var(--color-danger);
+      border: 1px solid var(--color-danger);
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.2s;
+    }
+    .btn-clear-all:active { background: #ffb4ae; }
+
+    .btn-delete-row {
+      background: transparent;
+      border: none;
+      color: var(--color-danger);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-delete-row:hover { background: var(--color-danger-bg); }
+
     .table-container {
       overflow-x: auto;
       padding: 0 16px 16px;
@@ -496,7 +526,10 @@
   </section>
 
   <section class="card">
-    <div class="card-hdr"><span>Base de Dados Real-Time (Histórico)</span></div>
+    <div class="card-hdr">
+      <span>Base de Dados Real-Time (Histórico)</span>
+      <button class="btn-clear-all" onclick="limparHistoricoCompleto()"><i class="ti ti-trash"></i> Limpar Tudo</button>
+    </div>
     <div class="table-container">
       <table class="db-table">
         <thead>
@@ -510,6 +543,7 @@
             <th>Inspection Method</th>
             <th>Total Inspected</th>
             <th>Total Rejected</th>
+            <th style="text-align: center;">Ações</th>
           </tr>
         </thead>
         <tbody id="db-rows"></tbody>
@@ -524,7 +558,6 @@
      ========================================================================== */
   document.getElementById('date-inicio').valueAsDate = new Date();
 
-  // Dados nativos caso o armazenamento local do navegador esteja totalmente vazio
   const DADOS_PADRAO = {
     "290Y16052R": { supplier: "YAZAKI SYSTEMS TECHNOLOGIES", desc: "CONN-ELEC", defect: "Broken Pin", method: "Visual Control" },
     "82003262249": { supplier: "UNITED SPRINGS SAS", desc: "SPRING-REVERSE BAULK", defect: "Deformated Spring", method: "Visual Control + Go/No-Go Gauge" },
@@ -534,7 +567,6 @@
     "294324PM0A": { supplier: "EGANA 2 S.L.", desc: "HSG ASSY-TRACTION MOTOR CLOSING PARTIAL", defect: "Sealing Surface Integrity", method: "Visual Control" }
   };
 
-  // Tenta carregar os fornecedores/part numbers aprendidos; se não existirem, usa a base padrão
   let DADOS_CONHECIDOS = JSON.parse(localStorage.getItem('aql_tracker_parts')) || DADOS_PADRAO;
 
   const DB = [
@@ -568,7 +600,6 @@
     validarTriagem();
   }
 
-  // Autocomplete dinâmico com base na memória estendida
   function autoCompletePart() {
     const pn = document.getElementById('part-number').value.trim();
     if (DADOS_CONHECIDOS[pn]) {
@@ -615,4 +646,197 @@
       pill.style.cssText = 'background:var(--color-danger-bg); color:var(--color-danger);';
       pill.innerHTML = '<i class="ti ti-alert-triangle"></i> Categoria A — Alto Risco';
       rc.style.borderColor = 'var(--color-danger)';
-      msg
+      msg.textContent = 'Aviso: RPN elevado ou falha crítica. Categoria A. Prosseguir com inspeção a 100% de todo o lote.';
+      met.style.display = 'none';
+      triagemCard.style.display = 'none';
+    } else if (cat === 'C') {
+      pill.style.cssText = 'background:var(--color-success-bg); color:var(--color-success);';
+      pill.innerHTML = '<i class="ti ti-circle-check"></i> Categoria C — Baixo Risco';
+      rc.style.borderColor = 'var(--color-success)';
+      msg.textContent = 'Baixo risco: Categoria C. Prosseguir com uma auditoria por amostragem (1 a 2 meses).';
+      met.style.display = 'none';
+      triagemCard.style.display = 'none';
+    } else {
+      const aql = hist === 'Normal' ? '2.5' : hist === 'NCs Menores' ? '1.5' : '1.0';
+      const row = lookup(lot);
+      const sm = row.s;
+      const ac = aql === '2.5' ? row.a25 : aql === '1.5' ? row.a15 : row.a10;
+      const re = aql === '2.5' ? row.r25 : aql === '1.5' ? row.r15 : row.r10;
+      
+      limiteRejeitar = re;
+      tamanhoAmostraCorrente = sm;
+
+      document.getElementById('total-inspecionado').value = sm;
+
+      pill.style.cssText = 'background:var(--color-info-bg); color:var(--color-info);';
+      pill.innerHTML = '<i class="ti ti-info-circle"></i> Categoria B — Risco Moderado';
+      rc.style.borderColor = 'var(--color-info)';
+      msg.textContent = 'Plano AQL dinâmico estabelecido. Realize a triagem e insira as peças reprovadas abaixo.';
+      
+      met.style.display = 'grid';
+      met.innerHTML = `
+        <div class="met"><span class="met-lbl">Nível AQL</span><span class="met-val">${aql}<span class="met-unit"> %</span></span></div>
+        <div class="met"><span class="met-lbl">Amostra</span><span class="met-val">${sm}<span class="met-unit"> pcs</span></span></div>
+        <div class="met"><span class="met-lbl">Aceitar (Ac)</span><span class="met-val" style="color:var(--color-success)">≤ ${ac}<span class="met-unit"> def.</span></span></div>
+        <div class="met"><span class="met-lbl">Rejeitar (Re)</span><span class="met-val" style="color:var(--color-danger)">≥ ${re}<span class="met-unit"> def.</span></span></div>
+      `;
+
+      triagemCard.style.display = 'block';
+      validarTriagem();
+    }
+  }
+
+  function carregarBancoDados() {
+    const dados = JSON.parse(localStorage.getItem('aql_tracker_db')) || [];
+    const tbody = document.getElementById('db-rows');
+    tbody.innerHTML = '';
+
+    if (dados.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:gray; padding:20px;">Nenhum registro salvo na base de dados local.</td></tr>';
+      return;
+    }
+
+    dados.forEach((item, index) => {
+      const tr = document.createElement('tr');
+      const badgeClass = item.status === 'ACTIVE' ? 'badge-active' : 'badge-suspended';
+      tr.innerHTML = `
+        <td><b>#${item.id}</b></td>
+        <td><span class="badge ${badgeClass}">${item.status}</span></td>
+        <td>${item.data}</td>
+        <td>${item.supplier || '-'}</td>
+        <td>${item.partNumber || '-'}</td>
+        <td>${item.defeito || '-'}</td>
+        <td>${item.metodo || '-'}</td>
+        <td>${item.inspected} pcs</td>
+        <td style="color:${item.rejected > 0 ? 'var(--color-danger)' : 'var(--color-success)'}; font-weight:bold;">${item.rejected} pcs</td>
+        <td style="text-align: center;">
+          <button class="btn-delete-row" onclick="eliminarRegistoIndividual(${index}, ${item.id})" title="Eliminar este registo">
+            <i class="ti ti-trash"></i>
+          </button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function salvarRegistro() {
+    const dados = JSON.parse(localStorage.getItem('aql_tracker_db')) || [];
+    const pNumber = document.getElementById('part-number').value.trim();
+    const splier = document.getElementById('supplier').value.trim();
+    const descItem = document.getElementById('description').value.trim();
+    const defeitoItem = document.getElementById('hist-defeito').value.trim();
+    const metodoItem = document.getElementById('metodo-inspecao').value.trim();
+
+    if (!pNumber || !splier) {
+      alert("Por favor, preencha pelo menos o Part Number e o Supplier antes de salvar.");
+      return;
+    }
+
+    const novoRegistro = {
+      id: dados.length > 0 ? Math.max(...dados.map(d => d.id)) + 1 : 1,
+      status: document.getElementById('status-item').value,
+      data: document.getElementById('date-inicio').value,
+      supplier: splier,
+      partNumber: pNumber,
+      defeito: defeitoItem,
+      metodo: metodoItem,
+      inspected: +document.getElementById('total-inspecionado').value || 0,
+      rejected: +document.getElementById('total-rejeitado').value || 0
+    };
+
+    DADOS_CONHECIDOS[pNumber] = {
+      supplier: splier,
+      desc: descItem,
+      defect: defeitoItem,
+      method: metodoItem
+    };
+
+    dados.push(novoRegistro);
+    localStorage.setItem('aql_tracker_db', JSON.stringify(dados));
+    localStorage.setItem('aql_tracker_parts', JSON.stringify(DADOS_CONHECIDOS));
+    
+    alert(`Sucesso! Registro #${novoRegistro.id} salvo com sucesso.`);
+    document.getElementById('total-rejeitado').value = 0;
+    
+    carregarBancoDados();
+    calc();
+  }
+
+  /* NOVAS FUNÇÕES DE EXCLUSÃO E LIMPEZA DE DADOS */
+
+  // 1. Eliminar registo individual com confirmação simples
+  function eliminarRegistoIndividual(indexNoArray, idDoRegisto) {
+    const confirmar = confirm(`Tem a certeza de que deseja eliminar o registo #${idDoRegisto}? Esta ação não pode ser desfeita.`);
+    if (confirmar) {
+      let dados = JSON.parse(localStorage.getItem('aql_tracker_db')) || [];
+      dados.splice(indexNoArray, 1); // Remove o item da lista pelo índice
+      localStorage.setItem('aql_tracker_db', JSON.stringify(dados));
+      carregarBancoDados(); // Atualiza a tabela
+    }
+  }
+
+  // 2. Limpar todo o histórico usando o sistema de DUPLA CONFIRMAÇÃO
+  function limparHistoricoCompleto() {
+    // Primeira Confirmação
+    const primeiraConfirmacao = confirm("⚠️ ATENÇÃO: Deseja realmente APAGAR TODO o histórico de inspeções do Tracker?");
+    
+    if (primeiraConfirmacao) {
+      // Segunda Confirmação (Dupla Confirmação de segurança)
+      const segundaConfirmacao = confirm("CUIDADO! Esta ação é irreversível. Todos os registos guardados na tabela real-time serão destruídos permanentemente. Continuar?");
+      
+      if (segundaConfirmacao) {
+        localStorage.removeItem('aql_tracker_db'); // Remove apenas a tabela de histórico
+        carregarBancoDados(); // Atualiza o ecrã
+        alert("Base de dados de histórico limpa com sucesso!");
+      }
+    }
+  }
+
+  /* ==========================================================================
+     FICHEIRO 3 EMBUTIDO: SERVICE WORKER EM LINHA (INLINE BLOB GENERATOR)
+     ========================================================================== */
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      const swCode = `
+        const CACHE_NAME = 'aql-tracker-single-v1';
+        const ASSETS = [
+          location.href,
+          'https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css'
+        ];
+
+        self.addEventListener('install', (e) => {
+          e.waitUntil(
+            caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+          );
+        });
+
+        self.addEventListener('activate', (e) => {
+          e.waitUntil(
+            caches.keys().then((keys) => Promise.all(
+              keys.map((k) => { if(k !== CACHE_NAME) return caches.delete(k); })
+            ))
+          );
+        });
+
+        self.addEventListener('fetch', (e) => {
+          e.respondWith(
+            caches.match(e.request).then((res) => res || fetch(e.request))
+          );
+        });
+      `;
+
+      const blob = new Blob([swCode], { type: 'application/javascript' });
+      const swUrl = URL.createObjectURL(blob);
+
+      navigator.serviceWorker.register(swUrl)
+        .then(reg => console.log('PWA: Service Worker interno ativo!'))
+        .catch(err => console.error('PWA: Erro no SW virtual:', err));
+    });
+  }
+
+  // Inicialização
+  calc();
+  carregarBancoDados();
+</script>
+</body>
+</html>

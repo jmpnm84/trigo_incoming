@@ -54,6 +54,47 @@
   </script>
 </body>
 </html>
+    :root { --primary: #2196F3; --bg: #F8F9FA; --text: #2D3436; --card: #FFFFFF; }
+    body { font-family: sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; }
+    .card { background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>AQL Inspection Tracker</h1>
+    <p>Status: <span id="status">Carregando...</span></p>
+  </div>
+
+  <script>
+    // 1. Criar e injetar o manifesto via Blob para evitar problemas de bloqueio
+    const manifest = {
+      "name": "AQL Inspection Tracker Pro",
+      "short_name": "AQL Tracker",
+      "display": "standalone",
+      "start_url": window.location.href,
+      "background_color": "#F8F9FA",
+      "theme_color": "#2196F3",
+      "icons": [{
+        "src": "https://cdn-icons-png.flaticon.com/512/2921/2921222.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }]
+    };
+    const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+    document.querySelector('#manifest-placeholder').href = URL.createObjectURL(blob);
+
+    // 2. Registrar Service Worker "in-memory" para permitir instalação
+    if ('serviceWorker' in navigator) {
+      const swCode = `self.addEventListener('fetch', () => {});`;
+      const blobSW = new Blob([swCode], {type: 'application/javascript'});
+      navigator.serviceWorker.register(URL.createObjectURL(blobSW))
+        .then(() => document.getElementById('status').innerText = "Pronto para instalar!")
+        .catch(err => console.error(err));
+    }
+  </script>
+</body>
+</html>
     /* ==========================================================================
        VARIÁVEIS DE COR & DESIGN SYSTEM (MATERIAL DESIGN 3)
        ========================================================================== */

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>AQL Inspection Tracker Pro</title>
   
-  <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkFRTCBJbnNwZWN0aW9uIFRyYWNrZXIgUHJvIiwKICAic2hvcnRfbmFtZSI6ICJBUUwgVHJhY2tlciIsCiAgImRlcmlwdGlvbiI6ICJCYXNlIGRlIGRhZG9zIGUgdHJpYWdlbSBvcGVyYWNpb25hbCBkZSBpbnNwZcOnw6NvIGRlIGVuZ2VuaGFyaWEgZGUgcXVhbGlkYWRlLiIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjRjhGOUZBIiwKICAidGhlbWVfY29sb3IiOiAiIzIxOTZGMyIsCiAgIm9yaWVudGF0aW9uIjogInBvcnRyYWl0IiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9naXRodWIuY29tL3VzZXItYXR0YWNobWVudHMvYXNzZXRzLzc4NzkwMDcxLTkzZjItNGRlNy04ZGI0LWRjYjhjYzI4YjQ1YiIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIiwKICAgICAgInB1cnBvc2UiOiAiYW55IG1hc2thYmxlIiwKICAgICAgImZvcmNlX2Rvd25sb2FkIjogZmFsc2UKICAgIH0KICBdCn0=">
+  <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkFRTCBJbnNwZWN0aW9uIFRyYWNrZXIgUHJvIiwKICAic2hvcnRfbmFtZSI6ICJBUUwgVHJhY2tlciIsCiAgImRlcmlwdGlvbiI6ICJCYXNlIGRlIGRhZG9zIGUgdHJpYWgelW0gb3BlcmFjaW9uYWwgZGUgaW5zcGVnw6PbyBkZSBlbmdlbmhhcmlhIGRlIHF1YWxpZGFkZS4iLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI0Y4RjlGQSIsCiAgInRoZW1lX2NvbG9yIjogIiMyMTk2RjMiLAogICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vZ2l0aHViLmNvbS91c2VyLWF0dGFjaG1lbnRzL2Fzc2V0cy83ODc5MDA3MS05M2YyLTRkZTctOGRiNC1kY2I4Y2MyOGI0NWIiLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSIsCiAgICAgICJmb3JjZV9kb3duaG9hZCI6IGZhbHNlCiAgICB9CiAgXQp9">
   
   <meta name="theme-color" content="#2196F3">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -445,7 +445,7 @@
         </div>
         <div class="input-group">
           <label for="supplier">Supplier (Fornecedor)</label>
-          <input type="text" id="supplier" class="form-control" placeholder="Preenchimento automático...">
+          <input type="text" id="supplier" class="form-control" placeholder="Introduza ou auto-preencha...">
         </div>
       </div>
       <div class="input-group">
@@ -524,7 +524,8 @@
      ========================================================================== */
   document.getElementById('date-inicio').valueAsDate = new Date();
 
-  const DADOS_CONHECIDOS = {
+  // Dados nativos caso o armazenamento local do navegador esteja totalmente vazio
+  const DADOS_PADRAO = {
     "290Y16052R": { supplier: "YAZAKI SYSTEMS TECHNOLOGIES", desc: "CONN-ELEC", defect: "Broken Pin", method: "Visual Control" },
     "82003262249": { supplier: "UNITED SPRINGS SAS", desc: "SPRING-REVERSE BAULK", defect: "Deformated Spring", method: "Visual Control + Go/No-Go Gauge" },
     "152415573R": { supplier: "BONTAZ CENTRE MAROC", desc: "VALVE-ENG OIL PUMP FLOW", defect: "Conductivity Variation", method: "Multimeter" },
@@ -532,6 +533,9 @@
     "296833614R": { supplier: "YAZAKI SYSTEMS TECHNOLOGIES", desc: "HARN-MOTOR SIGNAL CONN BASE", defect: "Terminal/Clip Non-Compliance", method: "Visual Control" },
     "294324PM0A": { supplier: "EGANA 2 S.L.", desc: "HSG ASSY-TRACTION MOTOR CLOSING PARTIAL", defect: "Sealing Surface Integrity", method: "Visual Control" }
   };
+
+  // Tenta carregar os fornecedores/part numbers aprendidos; se não existirem, usa a base padrão
+  let DADOS_CONHECIDOS = JSON.parse(localStorage.getItem('aql_tracker_parts')) || DADOS_PADRAO;
 
   const DB = [
     { min: 1,    s: 32,  a25: 1, r25: 2, a15: 0, r15: 1, a10: 0, r10: 1 },
@@ -564,13 +568,14 @@
     validarTriagem();
   }
 
+  // Autocomplete dinâmico com base na memória estendida
   function autoCompletePart() {
     const pn = document.getElementById('part-number').value.trim();
     if (DADOS_CONHECIDOS[pn]) {
-      document.getElementById('supplier').value = DADOS_CONHECIDOS[pn].supplier;
-      document.getElementById('description').value = DADOS_CONHECIDOS[pn].desc;
-      document.getElementById('hist-defeito').value = DADOS_CONHECIDOS[pn].defect;
-      document.getElementById('metodo-inspecao').value = DADOS_CONHECIDOS[pn].method;
+      document.getElementById('supplier').value = DADOS_CONHECIDOS[pn].supplier || '';
+      document.getElementById('description').value = DADOS_CONHECIDOS[pn].desc || '';
+      document.getElementById('hist-defeito').value = DADOS_CONHECIDOS[pn].defect || '';
+      document.getElementById('metodo-inspecao').value = DADOS_CONHECIDOS[pn].method || '';
     }
   }
 
@@ -610,162 +615,4 @@
       pill.style.cssText = 'background:var(--color-danger-bg); color:var(--color-danger);';
       pill.innerHTML = '<i class="ti ti-alert-triangle"></i> Categoria A — Alto Risco';
       rc.style.borderColor = 'var(--color-danger)';
-      msg.textContent = 'Aviso: RPN elevado ou falha crítica. Categoria A. Prosseguir com inspeção a 100% de todo o lote.';
-      met.style.display = 'none';
-      triagemCard.style.display = 'none';
-    } else if (cat === 'C') {
-      pill.style.cssText = 'background:var(--color-success-bg); color:var(--color-success);';
-      pill.innerHTML = '<i class="ti ti-circle-check"></i> Categoria C — Baixo Risco';
-      rc.style.borderColor = 'var(--color-success)';
-      msg.textContent = 'Baixo risco: Categoria C. Prosseguir com uma auditoria por amostragem (1 a 2 meses).';
-      met.style.display = 'none';
-      triagemCard.style.display = 'none';
-    } else {
-      const aql = hist === 'Normal' ? '2.5' : hist === 'NCs Menores' ? '1.5' : '1.0';
-      const row = lookup(lot);
-      const sm = row.s;
-      const ac = aql === '2.5' ? row.a25 : aql === '1.5' ? row.a15 : row.a10;
-      const re = aql === '2.5' ? row.r25 : aql === '1.5' ? row.r15 : row.r10;
-      
-      limiteRejeitar = re;
-      tamanhoAmostraCorrente = sm;
-
-      document.getElementById('total-inspecionado').value = sm;
-
-      pill.style.cssText = 'background:var(--color-info-bg); color:var(--color-info);';
-      pill.innerHTML = '<i class="ti ti-info-circle"></i> Categoria B — Risco Moderado';
-      rc.style.borderColor = 'var(--color-info)';
-      msg.textContent = 'Plano AQL dinâmico estabelecido. Realize a triagem e insira as peças reprovadas abaixo.';
-      
-      met.style.display = 'grid';
-      met.innerHTML = `
-        <div class="met"><span class="met-lbl">Nível AQL</span><span class="met-val">${aql}<span class="met-unit"> %</span></span></div>
-        <div class="met"><span class="met-lbl">Amostra</span><span class="met-val">${sm}<span class="met-unit"> pcs</span></span></div>
-        <div class="met"><span class="met-lbl">Aceitar (Ac)</span><span class="met-val" style="color:var(--color-success)">≤ ${ac}<span class="met-unit"> def.</span></span></div>
-        <div class="met"><span class="met-lbl">Rejeitar (Re)</span><span class="met-val" style="color:var(--color-danger)">≥ ${re}<span class="met-unit"> def.</span></span></div>
-      `;
-
-      triagemCard.style.display = 'block';
-      validarTriagem();
-    }
-  }
-
-  function carregarBancoDados() {
-    const dados = JSON.parse(localStorage.getItem('aql_tracker_db')) || [];
-    const tbody = document.getElementById('db-rows');
-    tbody.innerHTML = '';
-
-    if (dados.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:gray; padding:20px;">Nenhum registro salvo na base de dados local.</td></tr>';
-      return;
-    }
-
-    dados.forEach(item => {
-      const tr = document.createElement('tr');
-      const badgeClass = item.status === 'ACTIVE' ? 'badge-active' : 'badge-suspended';
-      tr.innerHTML = `
-        <td><b>#${item.id}</b></td>
-        <td><span class="badge ${badgeClass}">${item.status}</span></td>
-        <td>${item.data}</td>
-        <td>${item.supplier || '-'}</td>
-        <td>${item.partNumber || '-'}</td>
-        <td>${item.defeito || '-'}</td>
-        <td>${item.metodo || '-'}</td>
-        <td>${item.inspected} pcs</td>
-        <td style="color:${item.rejected > 0 ? 'var(--color-danger)' : 'var(--color-success)'}; font-weight:bold;">${item.rejected} pcs</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  function salvarRegistro() {
-    const dados = JSON.parse(localStorage.getItem('aql_tracker_db')) || [];
-    const pNumber = document.getElementById('part-number').value.trim();
-    const splier = document.getElementById('supplier').value.trim();
-
-    if (!pNumber || !splier) {
-      alert("Por favor, preencha pelo menos o Part Number e o Supplier antes de salvar.");
-      return;
-    }
-
-    const novoRegistro = {
-      id: dados.length + 1,
-      status: document.getElementById('status-item').value,
-      data: document.getElementById('date-inicio').value,
-      supplier: splier,
-      partNumber: pNumber,
-      defeito: document.getElementById('hist-defeito').value,
-      metodo: document.getElementById('metodo-inspecao').value,
-      inspected: +document.getElementById('total-inspecionado').value || 0,
-      rejected: +document.getElementById('total-rejeitado').value || 0
-    };
-
-    if (!DADOS_CONHECIDOS[pNumber]) {
-      DADOS_CONHECIDOS[pNumber] = {
-        supplier: novoRegistro.supplier,
-        desc: document.getElementById('description').value,
-        defect: novoRegistro.defeito,
-        method: novoRegistro.metodo
-      };
-    }
-
-    dados.push(novoRegistro);
-    localStorage.setItem('aql_tracker_db', JSON.stringify(dados));
-    
-    alert(`Sucesso! Registro #${novoRegistro.id} injetado na Base de Dados.`);
-    document.getElementById('total-rejeitado').value = 0;
-    
-    carregarBancoDados();
-    calc();
-  }
-
-  /* ==========================================================================
-     FICHEIRO 3 EMBUTIDO: SERVICE WORKER EM LINHA (INLINE BLOB GENERATOR)
-     ========================================================================== */
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      // String contendo toda a lógica do Service Worker
-      const swCode = `
-        const CACHE_NAME = 'aql-tracker-single-v1';
-        const ASSETS = [
-          location.href,
-          'https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css'
-        ];
-
-        self.addEventListener('install', (e) => {
-          e.waitUntil(
-            caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
-          );
-        });
-
-        self.addEventListener('activate', (e) => {
-          e.waitUntil(
-            caches.keys().then((keys) => Promise.all(
-              keys.map((k) => { if(k !== CACHE_NAME) return caches.delete(k); })
-            ))
-          );
-        });
-
-        self.addEventListener('fetch', (e) => {
-          e.respondWith(
-            caches.match(e.request).then((res) => res || fetch(e.request))
-          );
-        });
-      `;
-
-      // Conversão em tempo de execução para ficheiro virtual JavaScript
-      const blob = new Blob([swCode], { type: 'application/javascript' });
-      const swUrl = URL.createObjectURL(blob);
-
-      navigator.serviceWorker.register(swUrl)
-        .then(reg => console.log('PWA: Service Worker interno ativo e configurado com sucesso!'))
-        .catch(err => console.error('PWA: Falha na montagem do Service Worker virtual:', err));
-    });
-  }
-
-  // Inicialização Inicial da Aplicação
-  calc();
-  carregarBancoDados();
-</script>
-</body>
-</html>
+      msg

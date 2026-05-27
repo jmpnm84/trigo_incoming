@@ -5,25 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>AQL Inspection Tracker Pro</title>
   
-  <link rel="manifest" href='data:application/manifest+json,{
-    "name": "AQL Inspection Tracker Pro",
-    "short_name": "AQL Tracker",
-    "description": "Base de dados e triagem operacional de inspeção de engenharia de qualidade.",
-    "start_url": ".",
-    "display": "standalone",
-    "background_color": "#F8F9FA",
-    "theme_color": "#2196F3",
-    "orientation": "portrait",
-    "icons": [
-      {
-        "src": "https://github.com/user-attachments/assets/78790071-93f2-4de7-8db4-dcb8cc28b45b",
-        "sizes": "512x512",
-        "type": "image/png",
-        "purpose": "any maskable",
-        "force_download": true
-      }
-    ]
-  }'>
+  <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkFRTCBJbnNwZWN0aW9uIFRyYWNrZXIgUHJvIiwKICAic2hvcnRfbmFtZSI6ICJBUUwgVHJhY2tlciIsCiAgImRlcmlwdGlvbiI6ICJCYXNlIGRlIGRhZG9zIGUgdHJpYWgelW0gb3BlcmFjaW9uYWwgZGUgaW5zcGVnw6PbyBkZSBlbmdlbmhhcmlhIGRlIHF1YWxpZGFkZS4iLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI0Y4RjlGQSIsCiAgInRoZW1lX2NvbG9yIjogIiMyMTk2RjMiLAogICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vZ2l0aHViLmNvbS91c2VyLWF0dGFjaG1lbnRzL2Fzc2V0cy83ODc5MDA3MS05M2YyLTRkZTctOGRiNC1kY2I4Y2MyOGI0NWIiLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSIsCiAgICAgICJmb3JjZV9kb3duaG9hZCI6IGZhbHNlCiAgICB9CiAgXQp9">
   
   <meta name="theme-color" content="#2196F3">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -86,14 +68,21 @@
       gap: 14px;
       padding: 8px 4px 20px;
     }
+    /* Estilos do contentor do logótipo adaptados para imagem e fallback de ícone */
     .hdr-icon {
-      width: 44px;
-      height: 44px;
+      width: 46px;
+      height: 46px;
       border-radius: 12px;
       background: var(--md-sys-color-primary);
       display: flex;
       align-items: center;
       justify-content: center;
+      overflow: hidden;
+    }
+    .hdr-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
     .hdr-icon i {
       color: var(--md-sys-color-on-primary);
@@ -407,7 +396,7 @@
 
 <div class="app">
   <header class="hdr">
-    <div class="hdr-icon"><i class="ti ti-database"></i></div>
+    <div class="hdr-icon" id="app-logo-container"></div>
     <div class="hdr-text">
       <h1>AQL Inspector Tracker</h1>
       <p>Base de dados e triagem operacional</p>
@@ -573,7 +562,7 @@
             <th>Inspection Method</th>
             <th>Total Inspected</th>
             <th>Total Rejected</th>
-            <th>Ações</th>
+            <th style="text-align: center;">Ações</th>
           </tr>
         </thead>
         <tbody id="db-rows"></tbody>
@@ -583,6 +572,29 @@
 </div>
 
 <script>
+  /* ==========================================================================
+     CONFIGURAÇÃO DO LOGÓTIPO PERSONALIZADO VIA LINK
+     ========================================================================== */
+  // 🔽 COLA O LINK DA TUA IMAGEM/LOGÓTIPO AQUI ENTRE AS ASPAS 🔽
+  const URL_LOGOTIPO_PERSONALIZADO = "https://github.com/user-attachments/assets/e4e16378-571e-444d-94ef-916a51a81675"; 
+
+  function inicializarLogotipo() {
+    const container = document.getElementById('app-logo-container');
+    if (URL_LOGOTIPO_PERSONALIZADO && URL_LOGOTIPO_PERSONALIZADO.trim() !== "" && URL_LOGOTIPO_PERSONALIZADO !== "https://github.com/user-attachments/assets/e4e16378-571e-444d-94ef-916a51a81675") {
+      const img = document.createElement('img');
+      img.src = URL_LOGOTIPO_PERSONALIZADO;
+      img.alt = "Logo";
+      // Fallback: se a imagem do link falhar ou não carregar, volta a colocar o ícone nativo automaticamente
+      img.onerror = function() {
+        container.innerHTML = '<i class="ti ti-database"></i>';
+      };
+      container.appendChild(img);
+    } else {
+      // Ícone padrão caso o link esteja vazio
+      container.innerHTML = '<i class="ti ti-database"></i>';
+    }
+  }
+
   /* ==========================================================================
      MOTOR DE CÁLCULO, REGRAS AQL & LOGICA DE OPERAÇÃO
      ========================================================================== */
@@ -774,7 +786,6 @@
       rejected: +document.getElementById('total-rejeitado').value || 0
     };
 
-    // Atualiza base de dados de auto-preenchimento para este part number
     DADOS_CONHECIDOS[pNumber] = {
       supplier: splier,
       desc: descItem,
@@ -845,6 +856,7 @@
   }
 
   // Inicialização do App
+  inicializarLogotipo();
   calc();
   carregarBancoDados();
 </script>

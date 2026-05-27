@@ -5,24 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>AQL Inspection Tracker Pro</title>
   
-  <link rel="manifest" href="data:application/json;charset=utf-8,{
-    &quot;name&quot;: &quot;AQL Inspection Tracker Pro&quot;,
-    &quot;short_name&quot;: &quot;AQL Tracker&quot;,
-    &quot;description&quot;: &quot;Base de dados e triagem operacional de inspeção de engenharia de qualidade.&quot;,
-    &quot;start_url&quot;: &quot;.&quot;,
-    &quot;display&quot;: &quot;standalone&quot;,
-    &quot;background_color&quot;: &quot;#F8F9FA&quot;,
-    &quot;theme_color&quot;: &quot;#2196F3&quot;,
-    &quot;orientation&quot;: &quot;portrait&quot;,
-    &quot;icons&quot;: [
-      {
-        &quot;src&quot;: &quot;https://cdn.jsdelivr.net/npm/@tabler/icons-png@latest/icons/database.png&quot;,
-        &quot;sizes&quot;: &quot;512x512&quot;,
-        &quot;type&quot;: &quot;image/png&quot;,
-        &quot;purpose&quot;: &quot;any maskable&quot;
-      }
-    ]
-  }">
+  <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkFRTCBJbnNwZWN0aW9uIFRyYWNrZXIgUHJvIiwKICAic2hvcnRfbmFtZSI6ICJBUUwgVHJhY2tlciIsCiAgImRlc2NyaXB0aW9uIjogIkJhc2UgZGUgZGFkb3MgZSB0cmlhZ2VtIG9wZXJhY2lvbmFsIGRlIGluc3Blw6fDo28gZGUgZW5nZW5oYXJpYSBkZSBxdWFsaWRhZGUuIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNGOEY5RkEiLAogICJ0aGVtZV9jb2xvciI6ICIjMjE5NkYzIiwKICAib3JpZW50YXRpb24iOiAicG9ydHJhaXQiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL2Nkbi5qc2RlbGl2ci5uZXQvbnBtL0B0YWJsZXIvaWNvbnMtcG5nQGxhdGVzdC9pY29ucy9kYXRhYmFzZS5wbmciLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXJrYWJsZSIKICAgIH0KICBdCn0=">
   
   <meta name="theme-color" content="#2196F3">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -69,12 +52,45 @@
       color: var(--md-text-primary);
       padding: 16px;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
     }
 
     .app {
       width: 100%;
       max-width: 440px;
+    }
+
+    /* Banner Customizado de Instalação PWA */
+    #pwa-install-banner {
+      display: none;
+      background: var(--md-sys-color-surface-variant);
+      border: 1px solid var(--md-sys-color-primary);
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+      box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      max-width: 440px;
+      box-sizing: border-box;
+    }
+    #pwa-install-banner span {
+      flex-grow: 1;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--md-text-primary);
+    }
+    #btn-pwa-install {
+      background: var(--md-sys-color-primary);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
     }
 
     /* ==========================================================================
@@ -376,413 +392,399 @@
 </head>
 <body>
 
-<div class="app">
-  <header class="hdr">
-    <div class="hdr-icon"><i class="ti ti-database"></i></div>
-    <div class="hdr-text">
-      <h1>AQL Inspector Tracker</h1>
-      <p>Base de dados e triagem operacional</p>
-    </div>
-  </header>
+  <div id="pwa-install-banner">
+      <span id="pwa-text">Instalar AQL Tracker no Android?</span>
+      <button id="btn-pwa-install">Instalar</button>
+  </div>
 
-  <section class="card">
-    <div class="card-hdr"><span>Parâmetros de Qualidade & FMEA</span></div>
-    <div class="sod-grid">
-      <div class="sod-cell">
-        <span class="sod-label">Severity</span>
-        <div class="sod-stepper">
-          <button onclick="step('sev',-1)"><i class="ti ti-minus"></i></button>
-          <input type="number" id="sev" min="1" max="10" value="5" readonly>
-          <button onclick="step('sev',1)"><i class="ti ti-plus"></i></button>
-        </div>
+  <div class="app">
+    <header class="hdr">
+      <div class="hdr-icon"><i class="ti ti-database"></i></div>
+      <div class="hdr-text">
+        <h1>AQL Inspector Tracker</h1>
+        <p>Base de dados e triagem operacional</p>
       </div>
-      <div class="sod-cell">
-        <span class="sod-label">Occurrence</span>
-        <div class="sod-stepper">
-          <button onclick="step('occ',-1)"><i class="ti ti-minus"></i></button>
-          <input type="number" id="occ" min="1" max="10" value="3" readonly>
-          <button onclick="step('occ',1)"><i class="ti ti-plus"></i></button>
-        </div>
-      </div>
-      <div class="sod-cell">
-        <span class="sod-label">Detection</span>
-        <div class="sod-stepper">
-          <button onclick="step('det',-1)"><i class="ti ti-minus"></i></button>
-          <input type="number" id="det" min="1" max="10" value="3" readonly>
-          <button onclick="step('det',1)"><i class="ti ti-plus"></i></button>
-        </div>
-      </div>
-    </div>
-    <div class="form-grid">
-      <div class="form-row-2">
-        <div class="input-group">
-          <label for="lot">Tamanho do Lote</label>
-          <input type="number" class="form-control" id="lot" min="1" value="2000" oninput="calc()">
-        </div>
-        <div class="input-group">
-          <label for="hist">Histórico Compl.</label>
-          <select class="form-control" id="hist" onchange="calc()">
-            <option value="Normal">Normal</option>
-            <option value="NCs Menores">Minor NCs</option>
-            <option value="NCs Maiores">Major NCs</option>
-          </select>
-        </div>
-      </div>
-    </div>
-  </section>
+    </header>
 
-  <section class="card" id="result-card">
-    <div class="card-hdr"><span>Identificação de Categoria & Plano AQL</span></div>
-    <div class="result-body">
-      <div class="cat-pill" id="cat-pill"></div>
-      <p class="result-msg" id="result-msg"></p>
-      <div class="metrics" id="metrics" style="display:none;"></div>
-    </div>
-  </section>
+    <section class="card">
+      <div class="card-hdr"><span>Parâmetros de Qualidade & FMEA</span></div>
+      <div class="sod-grid">
+        <div class="sod-cell">
+          <span class="sod-label">Severity</span>
+          <div class="sod-stepper">
+            <button onclick="step('sev',-1)"><i class="ti ti-minus"></i></button>
+            <input type="number" id="sev" min="1" max="10" value="5" readonly>
+            <button onclick="step('sev',1)"><i class="ti ti-plus"></i></button>
+          </div>
+        </div>
+        <div class="sod-cell">
+          <span class="sod-label">Occurrence</span>
+          <div class="sod-stepper">
+            <button onclick="step('occ',-1)"><i class="ti ti-minus"></i></button>
+            <input type="number" id="occ" min="1" max="10" value="3" readonly>
+            <button onclick="step('occ',1)"><i class="ti ti-plus"></i></button>
+          </div>
+        </div>
+        <div class="sod-cell">
+          <span class="sod-label">Detection</span>
+          <div class="sod-stepper">
+            <button onclick="step('det',-1)"><i class="ti ti-minus"></i></button>
+            <input type="number" id="det" min="1" max="10" value="3" readonly>
+            <button onclick="step('det',1)"><i class="ti ti-plus"></i></button>
+          </div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row-2">
+          <div class="input-group">
+            <label for="lot">Tamanho do Lote</label>
+            <input type="number" class="form-control" id="lot" min="1" value="2000" oninput="calc()">
+          </div>
+          <div class="input-group">
+            <label for="hist">Histórico Compl.</label>
+            <select class="form-control" id="hist" onchange="calc()">
+              <option value="Normal">Normal</option>
+              <option value="NCs Menores">Minor NCs</option>
+              <option value="NCs Maiores">Major NCs</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
 
-  <section class="card">
-    <div class="card-hdr"><span>Identificação & Status do Item</span></div>
-    <div class="form-grid">
-      <div class="form-row-2">
-        <div class="input-group">
-          <label for="status-item">Estado do Item</label>
-          <select id="status-item" class="form-control">
-            <option value="ACTIVE">🟢 ACTIVE</option>
-            <option value="SUSPENDED">🔴 SUSPENDED</option>
-          </select>
-        </div>
-        <div class="input-group">
-          <label for="date-inicio">Data de Início</label>
-          <input type="date" id="date-inicio" class="form-control">
-        </div>
+    <section class="card" id="result-card">
+      <div class="card-hdr"><span>Identificação de Categoria & Plano AQL</span></div>
+      <div class="result-body">
+        <div class="cat-pill" id="cat-pill"></div>
+        <p class="result-msg" id="result-msg"></p>
+        <div class="metrics" id="metrics" style="display:none;"></div>
       </div>
-      <div class="form-row-2">
-        <div class="input-group">
-          <label for="part-number">Part Number</label>
-          <input type="text" id="part-number" class="form-control" placeholder="Ex: 290Y16052R" oninput="autoCompletePart()">
+    </section>
+
+    <section class="card">
+      <div class="card-hdr"><span>Identificação & Status do Item</span></div>
+      <div class="form-grid">
+        <div class="form-row-2">
+          <div class="input-group">
+            <label for="status-item">Estado do Item</label>
+            <select id="status-item" class="form-control">
+              <option value="ACTIVE">🟢 ACTIVE</option>
+              <option value="SUSPENDED">🔴 SUSPENDED</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="date-inicio">Data de Início</label>
+            <input type="date" id="date-inicio" class="form-control">
+          </div>
         </div>
-        <div class="input-group">
-          <label for="supplier">Supplier (Fornecedor)</label>
-          <input type="text" id="supplier" class="form-control" placeholder="Preenchimento automático...">
-        </div>
-      </div>
-      <div class="input-group">
-        <label for="description">Descrição do Item</label>
-        <input type="text" id="description" class="form-control" placeholder="Ex: CONN-ELEC">
-      </div>
-      <div class="form-row-2">
-        <div class="input-group">
-          <label for="hist-defeito">Histórico de Defeito</label>
-          <input type="text" id="hist-defeito" class="form-control" placeholder="Ex: Broken Pin">
+        <div class="form-row-2">
+          <div class="input-group">
+            <label for="part-number">Part Number</label>
+            <input type="text" id="part-number" class="form-control" placeholder="Ex: 290Y16052R" oninput="autoCompletePart()">
+          </div>
+          <div class="input-group">
+            <label for="supplier">Supplier (Fornecedor)</label>
+            <input type="text" id="supplier" class="form-control" placeholder="Preenchimento automático...">
+          </div>
         </div>
         <div class="input-group">
-          <label for="metodo-inspecao">Método de Inspeção</label>
-          <input type="text" id="metodo-inspecao" class="form-control" placeholder="Ex: Visual Control">
+          <label for="description">Descrição do Item</label>
+          <input type="text" id="description" class="form-control" placeholder="Ex: CONN-ELEC">
+        </div>
+        <div class="form-row-2">
+          <div class="input-group">
+            <label for="hist-defeito">Histórico de Defeito</label>
+            <input type="text" id="hist-defeito" class="form-control" placeholder="Ex: Broken Pin">
+          </div>
+          <div class="input-group">
+            <label for="metodo-inspecao">Método de Inspeção</label>
+            <input type="text" id="metodo-inspecao" class="form-control" placeholder="Ex: Visual Control">
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="card" id="triagem-card" style="display: none;">
-    <div class="card-hdr"><span>Triagem & Indicadores Operacionais</span></div>
-    <div class="triagem-body">
-      <div class="triagem-row">
-        <div class="triagem-info">
-          <span class="triagem-name">Quantidade Total Inspecionada</span>
-          <span class="triagem-desc">Quantidade física verificada da amostra</span>
+    <section class="card" id="triagem-card" style="display: none;">
+      <div class="card-hdr"><span>Triagem & Indicadores Operacionais</span></div>
+      <div class="triagem-body">
+        <div class="triagem-row">
+          <div class="triagem-info">
+            <span class="triagem-name">Quantidade Total Inspecionada</span>
+            <span class="triagem-desc">Quantidade física verificada da amostra</span>
+          </div>
+          <div class="counter-wrapper">
+            <button class="counter-btn" onclick="stepTriagem('total-inspecionado', -1)"><i class="ti ti-minus"></i></button>
+            <input type="number" id="total-inspecionado" class="counter-input" value="0" oninput="validarTriagem()">
+            <button class="counter-btn" onclick="stepTriagem('total-inspecionado', 1)"><i class="ti ti-plus"></i></button>
+          </div>
         </div>
-        <div class="counter-wrapper">
-          <button class="counter-btn" onclick="stepTriagem('total-inspecionado', -1)"><i class="ti ti-minus"></i></button>
-          <input type="number" id="total-inspecionado" class="counter-input" value="0" oninput="validarTriagem()">
-          <button class="counter-btn" onclick="stepTriagem('total-inspecionado', 1)"><i class="ti ti-plus"></i></button>
+        <div class="triagem-row">
+          <div class="triagem-info">
+            <span class="triagem-name">Quantidade Total Rejeitada</span>
+            <span class="triagem-desc">Peças reprovadas encontradas</span>
+          </div>
+          <div class="counter-wrapper">
+            <button class="counter-btn" onclick="stepTriagem('total-rejeitado', -1)"><i class="ti ti-minus"></i></button>
+            <input type="number" id="total-rejeitado" class="counter-input" value="0" oninput="validarTriagem()">
+            <button class="counter-btn" onclick="stepTriagem('total-rejeitado', 1)"><i class="ti ti-plus"></i></button>
+          </div>
         </div>
+        <div id="triagem-status-banner" class="status-banner"></div>
+        <button class="btn-submit" onclick="salvarRegistro()"><i class="ti ti-device-floppy"></i> Salvar e Registrar no Tracker</button>
       </div>
-      <div class="triagem-row">
-        <div class="triagem-info">
-          <span class="triagem-name">Quantidade Total Rejeitada</span>
-          <span class="triagem-desc">Peças reprovadas encontradas</span>
-        </div>
-        <div class="counter-wrapper">
-          <button class="counter-btn" onclick="stepTriagem('total-rejeitado', -1)"><i class="ti ti-minus"></i></button>
-          <input type="number" id="total-rejeitado" class="counter-input" value="0" oninput="validarTriagem()">
-          <button class="counter-btn" onclick="stepTriagem('total-rejeitado', 1)"><i class="ti ti-plus"></i></button>
-        </div>
+    </section>
+
+    <section class="card">
+      <div class="card-hdr"><span>Base de Dados Real-Time (Histórico)</span></div>
+      <div class="table-container">
+        <table class="db-table">
+          <thead>
+            <tr>
+              <th>Control No.</th>
+              <th>Status</th>
+              <th>Start Date</th>
+              <th>Supplier</th>
+              <th>Part Number</th>
+              <th>Historical Defect</th>
+              <th>Inspection Method</th>
+              <th>Total Inspected</th>
+              <th>Total Rejected</th>
+            </tr>
+          </thead>
+          <tbody id="db-rows"></tbody>
+        </table>
       </div>
-      <div id="triagem-status-banner" class="status-banner"></div>
-      <button class="btn-submit" onclick="salvarRegistro()"><i class="ti ti-device-floppy"></i> Salvar e Registrar no Tracker</button>
-    </div>
-  </section>
+    </section>
+  </div>
 
-  <section class="card">
-    <div class="card-hdr"><span>Base de Dados Real-Time (Histórico)</span></div>
-    <div class="table-container">
-      <table class="db-table">
-        <thead>
-          <tr>
-            <th>Control No.</th>
-            <th>Status</th>
-            <th>Start Date</th>
-            <th>Supplier</th>
-            <th>Part Number</th>
-            <th>Historical Defect</th>
-            <th>Inspection Method</th>
-            <th>Total Inspected</th>
-            <th>Total Rejected</th>
-          </tr>
-        </thead>
-        <tbody id="db-rows"></tbody>
-      </table>
-    </div>
-  </section>
-</div>
+  <script>
+    /* ==========================================================================
+       LÓGICA ORIGINAL DA APLICAÇÃO (CÁLCULOS E HISTÓRICO)
+       ========================================================================== */
+    document.getElementById('date-inicio').valueAsDate = new Date();
 
-<script>
-  /* ==========================================================================
-     ENGENHARIA DE CÁLCULO E MOTOR DE REGRAS (AQL / FMEA)
-     ========================================================================== */
-  document.getElementById('date-inicio').valueAsDate = new Date();
-
-  const DADOS_CONHECIDOS = {
-    "290Y16052R": { supplier: "YAZAKI SYSTEMS TECHNOLOGIES", desc: "CONN-ELEC", defect: "Broken Pin", method: "Visual Control" },
-    "82003262249": { supplier: "UNITED SPRINGS SAS", desc: "SPRING-REVERSE BAULK", defect: "Deformated Spring", method: "Visual Control + Go/No-Go Gauge" },
-    "152415573R": { supplier: "BONTAZ CENTRE MAROC", desc: "VALVE-ENG OIL PUMP FLOW", defect: "Conductivity Variation", method: "Multimeter" },
-    "152418461R": { supplier: "BONTAZ CENTRE MAROC", desc: "VALVE-ENG OIL PUMP FLOW", defect: "Conductivity Variation", method: "Multimeter" },
-    "296833614R": { supplier: "YAZAKI SYSTEMS TECHNOLOGIES", desc: "HARN-MOTOR SIGNAL CONN BASE", defect: "Terminal/Clip Non-Compliance", method: "Visual Control" },
-    "294324PM0A": { supplier: "EGANA 2 S.L.", desc: "HSG ASSY-TRACTION MOTOR CLOSING PARTIAL", defect: "Sealing Surface Integrity", method: "Visual Control" }
-  };
-
-  const DB = [
-    { min: 1,    s: 32,  a25: 1, r25: 2, a15: 0, r15: 1, a10: 0, r10: 1 },
-    { min: 200,  s: 50,  a25: 2, r25: 3, a15: 1, r15: 2, a10: 0, r10: 1 },
-    { min: 500,  s: 80,  a25: 3, r25: 4, a15: 2, r15: 3, a10: 1, r10: 2 },
-    { min: 1200, s: 125, a25: 5, r25: 6, a15: 3, r15: 4, a10: 2, r10: 3 },
-    { min: 3200, s: 200, a25: 7, r25: 8, a15: 5, r15: 6, a10: 3, r10: 4 }
-  ];
-
-  let limiteRejeitar = 0;
-  let tamanhoAmostraCorrente = 0;
-
-  function lookup(lot) {
-    let r = DB[0];
-    for (const x of DB) { if (lot >= x.min) r = x; else break; }
-    return r;
-  }
-  
-  function clamp(v, a, b) { return Math.min(Math.max(v, a), b); }
-  
-  function step(id, d) {
-    const el = document.getElementById(id);
-    el.value = clamp((+el.value || 1) + d, 1, 10);
-    calc();
-  }
-
-  function stepTriagem(id, d) {
-    const el = document.getElementById(id);
-    el.value = Math.max((+el.value || 0) + d, 0);
-    validarTriagem();
-  }
-
-  function autoCompletePart() {
-    const pn = document.getElementById('part-number').value.trim();
-    if (DADOS_CONHECIDOS[pn]) {
-      document.getElementById('supplier').value = DADOS_CONHECIDOS[pn].supplier;
-      document.getElementById('description').value = DADOS_CONHECIDOS[pn].desc;
-      document.getElementById('hist-defeito').value = DADOS_CONHECIDOS[pn].defect;
-      document.getElementById('metodo-inspecao').value = DADOS_CONHECIDOS[pn].method;
-    }
-  }
-
-  function validarTriagem() {
-    const inspecionado = +document.getElementById('total-inspecionado').value || 0;
-    const rejeitado = +document.getElementById('total-rejeitado').value || 0;
-    const banner = document.getElementById('triagem-status-banner');
-
-    if (inspecionado === 0 && rejeitado === 0) {
-      banner.style.cssText = 'background: #F1F3F5; color: var(--md-text-secondary);';
-      banner.innerHTML = '<i class="ti ti-hourglass"></i> Aguardando inserção de dados...';
-    } else if (rejeitado >= limiteRejeitar) {
-      banner.style.cssText = 'background: var(--color-danger-bg); color: var(--color-danger);';
-      banner.innerHTML = `<i class="ti ti-circle-x"></i> Lote Rejeitado (Rejeitado ≥ ${limiteRejeitar})`;
-    } else {
-      banner.style.cssText = 'background: var(--color-success-bg); color: var(--color-success);';
-      banner.innerHTML = `<i class="ti ti-circle-check"></i> Lote Aceito sob Amostragem`;
-    }
-  }
-
-  function calc() {
-    const S = clamp(+document.getElementById('sev').value || 1, 1, 10);
-    const O = clamp(+document.getElementById('occ').value || 1, 1, 10);
-    const D = clamp(+document.getElementById('det').value || 1, 1, 10);
-    const lot = Math.max(+document.getElementById('lot').value || 1, 1);
-    const hist = document.getElementById('hist').value;
-    const rpn = S * O * D;
-    
-    const cat = rpn >= 50 || S === 10 ? 'A' : rpn < 36 ? 'C' : 'B';
-    const pill = document.getElementById('cat-pill');
-    const msg = document.getElementById('result-msg');
-    const rc = document.getElementById('result-card');
-    const met = document.getElementById('metrics');
-    const triagemCard = document.getElementById('triagem-card');
-    
-    if (cat === 'A') {
-      pill.style.cssText = 'background:var(--color-danger-bg); color:var(--color-danger);';
-      pill.innerHTML = '<i class="ti ti-alert-triangle"></i> Categoria A — Alto Risco';
-      rc.style.borderColor = 'var(--color-danger)';
-      msg.textContent = 'Aviso: RPN elevado ou falha crítica. Categoria A. Prosseguir com inspeção a 100% de todo o lote.';
-      met.style.display = 'none';
-      triagemCard.style.display = 'none';
-    } else if (cat === 'C') {
-      pill.style.cssText = 'background:var(--color-success-bg); color:var(--color-success);';
-      pill.innerHTML = '<i class="ti ti-circle-check"></i> Categoria C — Baixo Risco';
-      rc.style.borderColor = 'var(--color-success)';
-      msg.textContent = 'Baixo risco: Categoria C. Prosseguir com uma auditoria por amostragem (1 a 2 meses).';
-      met.style.display = 'none';
-      triagemCard.style.display = 'none';
-    } else {
-      const aql = hist === 'Normal' ? '2.5' : hist === 'NCs Menores' ? '1.5' : '1.0';
-      const row = lookup(lot);
-      const sm = row.s;
-      const ac = aql === '2.5' ? row.a25 : aql === '1.5' ? row.a15 : row.a10;
-      const re = aql === '2.5' ? row.r25 : aql === '1.5' ? row.r15 : row.r10;
-      
-      limiteRejeitar = re;
-      tamanhoAmostraCorrente = sm;
-
-      document.getElementById('total-inspecionado').value = sm;
-
-      pill.style.cssText = 'background:var(--color-info-bg); color:var(--color-info);';
-      pill.innerHTML = '<i class="ti ti-info-circle"></i> Categoria B — Risco Moderado';
-      rc.style.borderColor = 'var(--color-info)';
-      msg.textContent = 'Plano AQL dinâmico estabelecido. Realize a triagem e insira as peças reprovadas abaixo.';
-      
-      met.style.display = 'grid';
-      met.innerHTML = `
-        <div class="met"><span class="met-lbl">Nível AQL</span><span class="met-val">${aql}<span class="met-unit"> %</span></span></div>
-        <div class="met"><span class="met-lbl">Amostra</span><span class="met-val">${sm}<span class="met-unit"> pcs</span></span></div>
-        <div class="met"><span class="met-lbl">Aceitar (Ac)</span><span class="met-val" style="color:var(--color-success)">≤ ${ac}<span class="met-unit"> def.</span></span></div>
-        <div class="met"><span class="met-lbl">Rejeitar (Re)</span><span class="met-val" style="color:var(--color-danger)">≥ ${re}<span class="met-unit"> def.</span></span></div>
-      `;
-
-      triagemCard.style.display = 'block';
-      validarTriagem();
-    }
-  }
-
-  function carregarBancoDados() {
-    const dados = JSON.parse(localStorage.getItem('aql_tracker_db')) || [];
-    const tbody = document.getElementById('db-rows');
-    tbody.innerHTML = '';
-
-    if (dados.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:gray; padding:20px;">Nenhum registro salvo na base de dados local.</td></tr>';
-      return;
-    }
-
-    dados.forEach(item => {
-      const tr = document.createElement('tr');
-      const badgeClass = item.status === 'ACTIVE' ? 'badge-active' : 'badge-suspended';
-      tr.innerHTML = `
-        <td><b>#${item.id}</b></td>
-        <td><span class="badge ${badgeClass}">${item.status}</span></td>
-        <td>${item.data}</td>
-        <td>${item.supplier || '-'}</td>
-        <td>${item.partNumber || '-'}</td>
-        <td>${item.defeito || '-'}</td>
-        <td>${item.metodo || '-'}</td>
-        <td>${item.inspected} pcs</td>
-        <td style="color:${item.rejected > 0 ? 'var(--color-danger)' : 'var(--color-success)'}; font-weight:bold;">${item.rejected} pcs</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  function salvarRegistro() {
-    const dados = JSON.parse(localStorage.getItem('aql_tracker_db')) || [];
-    const pNumber = document.getElementById('part-number').value.trim();
-    const splier = document.getElementById('supplier').value.trim();
-
-    if (!pNumber || !splier) {
-      alert("Por favor, preencha pelo menos o Part Number e o Supplier antes de salvar.");
-      return;
-    }
-
-    const novoRegistro = {
-      id: dados.length + 1,
-      status: document.getElementById('status-item').value,
-      data: document.getElementById('date-inicio').value,
-      supplier: splier,
-      partNumber: pNumber,
-      defeito: document.getElementById('hist-defeito').value,
-      metodo: document.getElementById('metodo-inspecao').value,
-      inspected: +document.getElementById('total-inspecionado').value || 0,
-      rejected: +document.getElementById('total-rejeitado').value || 0
+    const DADOS_CONHECIDOS = {
+      "290Y16052R": { supplier: "YAZAKI SYSTEMS TECHNOLOGIES", desc: "CONN-ELEC", defect: "Broken Pin", method: "Visual Control" },
+      "82003262249": { supplier: "UNITED SPRINGS SAS", desc: "SPRING-REVERSE BAULK", defect: "Deformated Spring", method: "Visual Control + Go/No-Go Gauge" },
+      "152415573R": { supplier: "BONTAZ CENTRE MAROC", desc: "VALVE-ENG OIL PUMP FLOW", defect: "Conductivity Variation", method: "Multimeter" },
+      "152418461R": { supplier: "BONTAZ CENTRE MAROC", desc: "VALVE-ENG OIL PUMP FLOW", defect: "Conductivity Variation", method: "Multimeter" },
+      "296833614R": { supplier: "YAZAKI SYSTEMS TECHNOLOGIES", desc: "HARN-MOTOR SIGNAL CONN BASE", defect: "Terminal/Clip Non-Compliance", method: "Visual Control" },
+      "294324PM0A": { supplier: "EGANA 2 S.L.", desc: "HSG ASSY-TRACTION MOTOR CLOSING PARTIAL", defect: "Sealing Surface Integrity", method: "Visual Control" }
     };
 
-    if (!DADOS_CONHECIDOS[pNumber]) {
-      DADOS_CONHECIDOS[pNumber] = {
-        supplier: novoRegistro.supplier,
-        desc: document.getElementById('description').value,
-        defect: novoRegistro.defeito,
-        method: novoRegistro.metodo
-      };
+    const DB = [
+      { min: 1,    s: 32,  a25: 1, r25: 2, a15: 0, r15: 1, a10: 0, r10: 1 },
+      { min: 200,  s: 50,  a25: 2, r25: 3, a15: 1, r15: 2, a10: 0, r10: 1 },
+      { min: 500,  s: 80,  a25: 3, r25: 4, a15: 2, r15: 3, a10: 1, r10: 2 },
+      { min: 1200, s: 125, a25: 5, r25: 6, a15: 3, r15: 4, a10: 2, r10: 3 },
+      { min: 3200, s: 200, a25: 7, r25: 8, a15: 5, r15: 6, a10: 3, r10: 4 }
+    ];
+
+    let limiteRejeitar = 0;
+    let tamanhoAmostraCorrente = 0;
+
+    function lookup(lot) {
+      let r = DB[0];
+      for (const x of DB) { if (lot >= x.min) r = x; else break; }
+      return r;
+    }
+    
+    function clamp(v, a, b) { return Math.min(Math.max(v, a), b); }
+    
+    function step(id, d) {
+      const el = document.getElementById(id);
+      el.value = clamp((+el.value || 1) + d, 1, 10);
+      calc();
     }
 
-    dados.push(novoRegistro);
-    localStorage.setItem('aql_tracker_db', JSON.stringify(dados));
-    
-    alert(`Sucesso! Registro #${novoRegistro.id} injetado na Base de Dados.`);
-    document.getElementById('total-rejeitado').value = 0;
-    
-    carregarBancoDados();
-    calc();
-  }
+    function stepTriagem(id, d) {
+      const el = document.getElementById(id);
+      el.value = Math.max((+el.value || 0) + d, 0);
+      validarTriagem();
+    }
 
-  /* ==========================================================================
-     SERVICE WORKER NATIVO DESENCRIPTADO (Para suporte Offline e PWA)
-     ========================================================================== */
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      // Criação limpa do script do Service Worker sem criptografia Base64 ou emaranhados
-      const swCode = `
-        const CACHE_NAME = 'aql-tracker-single-v1';
-        const ASSETS = [
-          location.href,
-          'https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css'
-        ];
+    function autoCompletePart() {
+      const pn = document.getElementById('part-number').value.trim();
+      if (DADOS_CONHECIDOS[pn]) {
+        document.getElementById('supplier').value = DADOS_CONHECIDOS[pn].supplier;
+        document.getElementById('description').value = DADOS_CONHECIDOS[pn].desc;
+        document.getElementById('hist-defeito').value = DADOS_CONHECIDOS[pn].defect;
+        document.getElementById('metodo-inspecao').value = DADOS_CONHECIDOS[pn].method;
+      }
+    }
 
-        self.addEventListener('install', (e) => {
-          e.waitUntil(
-            caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
-          );
-        });
+    function validarTriagem() {
+      const inspecionado = +document.getElementById('total-inspecionado').value || 0;
+      const rejeitado = +document.getElementById('total-rejeitado').value || 0;
+      const banner = document.getElementById('triagem-status-banner');
 
-        self.addEventListener('activate', (e) => {
-          e.waitUntil(
-            caches.keys().then((keys) => Promise.all(
-              keys.map((k) => { if(k !== CACHE_NAME) return caches.delete(k); })
-            ))
-          );
-        });
+      if (inspecionado === 0 && rejeitado === 0) {
+        banner.style.cssText = 'background: #F1F3F5; color: var(--md-text-secondary);';
+        banner.innerHTML = '<i class="ti ti-hourglass"></i> Aguardando inserção de dados...';
+      } else if (rejeitado >= limiteRejeitar) {
+        banner.style.cssText = 'background: var(--color-danger-bg); color: var(--color-danger);';
+        banner.innerHTML = `<i class="ti ti-circle-x"></i> Lote Rejeitado (Rejeitado ≥ ${limiteRejeitar})`;
+      } else {
+        banner.style.cssText = 'background: var(--color-success-bg); color: var(--color-success);';
+        banner.innerHTML = `<i class="ti ti-circle-check"></i> Lote Aceito sob Amostragem`;
+      }
+    }
 
-        self.addEventListener('fetch', (e) => {
-          e.respondWith(
-            caches.match(e.request).then((res) => res || fetch(e.request))
-          );
-        });
+    function calc() {
+      const S = clamp(+document.getElementById('sev').value || 1, 1, 10);
+      const O = clamp(+document.getElementById('occ').value || 1, 1, 10);
+      const D = clamp(+document.getElementById('det').value || 1, 1, 10);
+      const lot = Math.max(+document.getElementById('lot').value || 1, 1);
+      const hist = document.getElementById('hist').value;
+      const rpn = S * O * D;
+      
+      const cat = rpn >= 50 || S === 10 ? 'A' : rpn < 36 ? 'C' : 'B';
+      const pill = document.getElementById('cat-pill');
+      const msg = document.getElementById('result-msg');
+      const rc = document.getElementById('result-card');
+      const met = document.getElementById('metrics');
+      const triagemCard = document.getElementById('triagem-card');
+      
+      if (cat === 'A') {
+        pill.style.cssText = 'background:var(--color-danger-bg); color:var(--color-danger);';
+        pill.innerHTML = '<i class="ti ti-alert-triangle"></i> Categoria A — Alto Risco';
+        rc.style.borderColor = 'var(--color-danger)';
+        msg.textContent = 'Aviso: RPN elevado ou falha crítica. Categoria A. Prosseguir com inspeção a 100% de todo o lote.';
+        met.style.display = 'none';
+        triagemCard.style.display = 'none';
+      } else if (cat === 'C') {
+        pill.style.cssText = 'background:var(--color-success-bg); color:var(--color-success);';
+        pill.innerHTML = '<i class="ti ti-circle-check"></i> Categoria C — Baixo Risco';
+        rc.style.borderColor = 'var(--color-success)';
+        msg.textContent = 'Baixo risco: Categoria C. Prosseguir com uma auditoria por amostragem (1 a 2 meses).';
+        met.style.display = 'none';
+        triagemCard.style.display = 'none';
+      } else {
+        const aql = hist === 'Normal' ? '2.5' : hist === 'NCs Menores' ? '1.5' : '1.0';
+        const row = lookup(lot);
+        const sm = row.s;
+        const ac = aql === '2.5' ? row.a25 : aql === '1.5' ? row.a15 : row.a10;
+        const re = aql === '2.5' ? row.r25 : aql === '1.5' ? row.r15 : row.r10;
+        
+        limiteRejeitar = re;
+        tamanhoAmostraCorrente = sm;
+
+        document.getElementById('total-inspecionado').value = sm;
+
+        pill.style.cssText = 'background:var(--color-info-bg); color:var(--color-info);';
+        pill.innerHTML = '<i class="ti ti-info-circle"></i> Categoria B — Risco Moderado';
+        rc.style.borderColor = 'var(--color-info)';
+        msg.textContent = 'Plano AQL dinâmico estabelecido. Realize a triagem e insira as peças reprovadas abaixo.';
+        
+        met.style.display = 'grid';
+        met.innerHTML = `
+          <div class="met"><span class="met-lbl">Nível AQL</span><span class="met-val">${aql}<span class="met-unit"> %</span></span></div>
+          <div class="met"><span class="met-lbl">Amostra</span><span class="met-val">${sm}<span class="met-unit"> pcs</span></span></div>
+          <div class="met"><span class="met-lbl">Aceitar (Ac)</span><span class="met-val" style="color:var(--color-success)">≤ ${ac}<span class="met-unit"> def.</span></span></div>
+          <div class="met"><span class="met-lbl">Rejeitar (Re)</span><span class="met-val" style="color:var(--color-danger)">≥ ${re}<span class="met-unit"> def.</span></span></div>
+        `;
+        triagemCard.style.display = 'block';
+        validarTriagem();
+      }
+    }
+
+    let controlCount = 1;
+    function salvarRegistro() {
+      const status = document.getElementById('status-item').value;
+      const date = document.getElementById('date-inicio').value;
+      const supplier = document.getElementById('supplier').value || "N/A";
+      const pn = document.getElementById('part-number').value || "N/A";
+      const defect = document.getElementById('hist-defeito').value || "N/A";
+      const method = document.getElementById('metodo-inspecao').value || "N/A";
+      const inspecionado = document.getElementById('total-inspecionado').value;
+      const rejeitado = document.getElementById('total-rejeitado').value;
+
+      const tbody = document.getElementById('db-rows');
+      const row = document.createElement('tr');
+
+      row.innerHTML = `
+        <td>#${String(controlCount++).padStart(3, '0')}</td>
+        <td><span class="badge ${status === 'ACTIVE' ? 'badge-active' : 'badge-suspended'}">${status}</span></td>
+        <td>${date}</td>
+        <td>${supplier}</td>
+        <td>${pn}</td>
+        <td>${defect}</td>
+        <td>${method}</td>
+        <td>${inspecionado}</td>
+        <td>${rejeitado}</td>
       `;
+      tbody.insertBefore(row, tbody.firstChild);
+    }
 
-      const blob = new Blob([swCode], { type: 'application/javascript' });
-      const swUrl = URL.createObjectURL(blob);
+    // Inicialização automática do cálculo
+    calc();
 
-      navigator.serviceWorker.register(swUrl)
-        .then(reg => console.log('PWA: Service Worker ativo com sucesso!'))
-        .catch(err => console.error('PWA: Falha ao carregar o Service Worker:', err));
+    /* ==========================================================================
+       INFRAESTRUTURA MOTOR PWA (SERVICE WORKER INTEGRADO)
+       ========================================================================== */
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            // Código do Service Worker isolado convertido dinamicamente para URL Blob
+            const swCode = `
+                const CACHE_NAME = 'aql-tracker-cache-v1';
+                self.addEventListener('install', (e) => {
+                    self.skipWaiting();
+                });
+                self.addEventListener('activate', (e) => {
+                    e.waitUntil(clients.claim());
+                });
+                self.addEventListener('fetch', (e) => {
+                    // Estratégia Network-First com fallback rápido para cache offline
+                    e.respondWith(
+                        fetch(e.request)
+                            .then((response) => {
+                                if(e.request.method === 'GET' && response.status === 200) {
+                                    const responseClone = response.clone();
+                                    caches.open(CACHE_NAME).then((cache) => {
+                                        cache.put(e.request, responseClone);
+                                    });
+                                }
+                                return response;
+                            })
+                            .catch(() => caches.match(e.request))
+                    );
+                });
+            `;
+
+            const blobSW = new Blob([swCode], { type: 'application/javascript' });
+            const swURL = URL.createObjectURL(blobSW);
+
+            navigator.serviceWorker.register(swURL, { scope: './' })
+                .then(reg => console.log('PWA: Service Worker ativo via Blob.'))
+                .catch(err => console.error('PWA: Falha ao registrar Service Worker:', err));
+        });
+    }
+
+    // Gerenciador do Prompt Nativo do Android (Chrome WebAPK)
+    let deferredPrompt;
+    const installBanner = document.getElementById('pwa-install-banner');
+    const installBtn = document.getElementById('btn-pwa-install');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Bloqueia a barra padrão do navegador para expor o banner integrado fluido
+        e.preventDefault();
+        deferredPrompt = e;
+        installBanner.style.display = 'flex';
     });
-  }
 
-  // Inicialização do App
-  calc();
-  carregarBancoDados();
-</script>
+    installBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`PWA: Resposta da instalação: ${outcome}`);
+        deferredPrompt = null;
+        installBanner.style.display = 'none';
+    });
+
+    window.addEventListener('appinstalled', () => {
+        console.log('PWA: Aplicativo instalado com sucesso no sistema Android.');
+        installBanner.style.display = 'none';
+    });
+  </script>
 </body>
 </html>

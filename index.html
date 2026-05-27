@@ -5,70 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>AQL Inspection Tracker Pro</title>
   
-  <link id="manifest-link" rel="manifest" href="">
+  <link id="manifest-placeholder" rel="manifest" href="">
 
   <meta name="theme-color" content="#2196F3">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  
   <style>
-    :root { --primary: #2196F3; --bg: #F8F9FA; --text: #2D3436; }
-    body { font-family: sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; }
-    .card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-  </style>
-</head>
-<body>
-
-  <div class="card">
-    <h1>AQL Inspection Tracker Pro</h1>
-    <p>Sistema pronto para instalação.</p>
-  </div>
-
-  <script>
-    // 1. Criar o manifesto dinamicamente e injetar
-    const manifest = {
-      "name": "AQL Inspection Tracker Pro",
-      "short_name": "AQL Tracker",
-      "description": "Base de dados e triagem operacional de inspeção de engenharia de qualidade.",
-      "start_url": window.location.href,
-      "display": "standalone",
-      "background_color": "#F8F9FA",
-      "theme_color": "#2196F3",
-      "orientation": "portrait",
-      "icons": [{
-        "src": "https://cdn-icons-png.flaticon.com/512/2921/2921222.png",
-        "sizes": "512x512",
-        "type": "image/png",
-        "purpose": "any maskable"
-      }]
-    };
-    const blobManifest = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
-    document.getElementById('manifest-link').href = URL.createObjectURL(blobManifest);
-
-    // 2. Registrar um Service Worker básico em memória (ESSENCIAL para instalação)
-    if ('serviceWorker' in navigator) {
-      const swCode = `self.addEventListener('fetch', () => {});`;
-      const blobSW = new Blob([swCode], {type: 'application/javascript'});
-      navigator.serviceWorker.register(URL.createObjectURL(blobSW))
-        .catch(err => console.error("Erro ao registrar SW:", err));
-    }
-  </script>
-</body>
-</html>
-    /* ==========================================================================
-       VARIÁVEIS DE COR & DESIGN SYSTEM (MATERIAL DESIGN 3)
-       ========================================================================== */
     :root {
       --md-sys-color-primary: #2196F3;
       --md-sys-color-on-primary: #FFFFFF;
       --md-sys-color-surface: #F8F9FA;
       --md-sys-color-surface-variant: #FFFFFF;
       --md-sys-color-outline: #E0E0E0;
-      
       --md-text-primary: #1A1C1E;
       --md-text-secondary: #43474E;
       --md-text-tertiary: #73777F;
-
       --color-danger: #BA1A1A;
       --color-danger-bg: #FFDAD7;
       --color-success: #006D44;
@@ -76,352 +30,53 @@
       --color-info: #0061A4;
       --color-info-bg: #D1E4FF;
     }
-    /* ==========================================================================
-       ESTRUTURA GLOBAL & RESETS
-       ========================================================================== */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      background-color: var(--md-sys-color-surface);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      color: var(--md-text-primary);
-      padding: 16px;
-      display: flex;
-      justify-content: center;
-    }
-
-    .app {
-      width: 100%;
-      max-width: 440px;
-    }
-
-    /* ==========================================================================
-       COMPONENTES DE INTERFACE (UI)
-       ========================================================================== */
-    .hdr {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 8px 4px 20px;
-    }
-    .hdr-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: var(--md-sys-color-primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .hdr-icon i {
-      color: var(--md-sys-color-on-primary);
-      font-size: 22px;
-    }
-    .hdr-text h1 {
-      font-size: 20px;
-      font-weight: 600;
-      letter-spacing: -0.2px;
-    }
-    .hdr-text p {
-      font-size: 13px;
-      color: var(--md-text-secondary);
-    }
-
-    .card {
-      background: var(--md-sys-color-surface-variant);
-      border: 1px solid var(--md-sys-color-outline);
-      border-radius: 16px;
-      margin-bottom: 16px;
-      box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.05);
-      overflow: hidden;
-    }
-    .card-hdr {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--md-sys-color-outline);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .card-hdr span {
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      color: var(--md-text-secondary);
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-      padding: 16px;
-    }
-    .form-row-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-    .input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .input-group label {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--md-text-secondary);
-    }
-    .form-control {
-      width: 100%;
-      font-size: 14px;
-      font-weight: 500;
-      font-family: inherit;
-      background: #F1F3F5;
-      border: 1px solid transparent;
-      border-radius: 10px;
-      padding: 10px 12px;
-      color: var(--md-text-primary);
-      outline: none;
-      transition: border-color 0.2s, background 0.2s;
-    }
-    .form-control:focus {
-      border-color: var(--md-sys-color-primary);
-      background: #FFFFFF;
-    }
-    
-    select.form-control {
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2343474E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 12px center;
-      padding-right: 32px;
-    }
-
-    .sod-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      border-bottom: 1px solid var(--md-sys-color-outline);
-    }
-    .sod-cell {
-      padding: 16px 8px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-    .sod-cell:not(:last-child) {
-      border-right: 1px solid var(--md-sys-color-outline);
-    }
-    .sod-label {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      color: var(--md-text-tertiary);
-    }
-    .sod-cell input[type=number] {
-      width: 100%;
-      text-align: center;
-      font-size: 26px;
-      font-weight: 600;
-      color: var(--md-text-primary);
-      background: transparent;
-      border: none;
-      outline: none;
-      pointer-events: none;
-    }
-    
-    .sod-stepper {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      padding: 0 2px;
-    }
-    .sod-stepper button {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: #F1F3F5;
-      border: none;
-      color: var(--md-text-primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-    .sod-stepper button:active { background: #E2E6EA; }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--md-sys-color-surface); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--md-text-primary); padding: 16px; display: flex; justify-content: center; }
+    .app { width: 100%; max-width: 440px; }
+    .hdr { display: flex; align-items: center; gap: 14px; padding: 8px 4px 20px; }
+    .hdr-icon { width: 44px; height: 44px; border-radius: 12px; background: var(--md-sys-color-primary); display: flex; align-items: center; justify-content: center; }
+    .hdr-icon i { color: var(--md-sys-color-on-primary); font-size: 22px; }
+    .hdr-text h1 { font-size: 20px; font-weight: 600; letter-spacing: -0.2px; }
+    .hdr-text p { font-size: 13px; color: var(--md-text-secondary); }
+    .card { background: var(--md-sys-color-surface-variant); border: 1px solid var(--md-sys-color-outline); border-radius: 16px; margin-bottom: 16px; box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.05); overflow: hidden; }
+    .card-hdr { padding: 14px 16px; border-bottom: 1px solid var(--md-sys-color-outline); display: flex; align-items: center; justify-content: space-between; }
+    .card-hdr span { font-size: 12px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: var(--md-text-secondary); }
+    .form-grid { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 16px; }
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .input-group { display: flex; flex-direction: column; gap: 6px; }
+    .input-group label { font-size: 12px; font-weight: 600; color: var(--md-text-secondary); }
+    .form-control { width: 100%; font-size: 14px; font-weight: 500; font-family: inherit; background: #F1F3F5; border: 1px solid transparent; border-radius: 10px; padding: 10px 12px; color: var(--md-text-primary); outline: none; transition: border-color 0.2s, background 0.2s; }
+    .form-control:focus { border-color: var(--md-sys-color-primary); background: #FFFFFF; }
+    select.form-control { appearance: none; background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+    .sod-grid { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--md-sys-color-outline); }
+    .sod-cell { padding: 16px 8px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .sod-cell:not(:last-child) { border-right: 1px solid var(--md-sys-color-outline); }
+    .sod-label { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--md-text-tertiary); }
+    .sod-cell input[type=number] { width: 100%; text-align: center; font-size: 26px; font-weight: 600; color: var(--md-text-primary); background: transparent; border: none; outline: none; pointer-events: none; }
+    .sod-stepper { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0 2px; }
+    .sod-stepper button { width: 28px; height: 28px; border-radius: 50%; background: #F1F3F5; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     .result-body { padding: 18px 16px; }
-    .cat-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      padding: 6px 14px;
-      border-radius: 8px;
-      margin-bottom: 12px;
-    }
-    .result-msg { font-size: 14px; color: var(--md-text-primary); line-height: 1.5; }
-    
-    .metrics {
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid var(--md-sys-color-outline);
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .met {
-      background: #F1F3F5;
-      border-radius: 12px;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-    }
-    .met-lbl { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--md-text-tertiary); }
+    .cat-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 8px; margin-bottom: 12px; }
+    .metrics { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--md-sys-color-outline); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .met { background: #F1F3F5; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .met-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--md-text-tertiary); }
     .met-val { font-size: 20px; font-weight: 700; color: var(--md-text-primary); }
     .met-unit { font-size: 11px; font-weight: 500; color: var(--md-text-secondary); }
-
     .triagem-body { padding: 16px; }
-    .triagem-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 0;
-    }
+    .triagem-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; }
     .triagem-row:not(:last-child) { border-bottom: 1px solid var(--md-sys-color-outline); }
-    .triagem-info { display: flex; flex-direction: column; gap: 2px; }
-    .triagem-name { font-size: 14px; font-weight: 600; color: var(--md-text-primary); }
-    .triagem-desc { font-size: 12px; color: var(--md-text-tertiary); }
-    
-    .counter-wrapper {
-      display: flex;
-      align-items: center;
-      background: #F1F3F5;
-      border-radius: 10px;
-      padding: 2px;
-    }
-    .counter-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      background: white;
-      border: 1px solid var(--md-sys-color-outline);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      color: var(--md-text-primary);
-    }
-    .counter-input {
-      font-size: 16px;
-      font-weight: 700;
-      width: 60px;
-      text-align: center;
-      border: none;
-      background: transparent;
-      color: var(--md-text-primary);
-      outline: none;
-    }
-    
-    .status-banner {
-      padding: 12px 16px;
-      font-size: 14px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border-radius: 12px;
-      margin-top: 14px;
-      justify-content: center;
-    }
-
-    .btn-submit {
-      width: 100%;
-      background: var(--md-sys-color-primary);
-      color: white;
-      border: none;
-      padding: 14px;
-      font-size: 14px;
-      font-weight: 600;
-      border-radius: 12px;
-      margin-top: 16px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .btn-submit:active { opacity: 0.9; }
-
-    .btn-clear-all {
-      background: var(--color-danger-bg);
-      color: var(--color-danger);
-      border: 1px solid var(--color-danger);
-      padding: 6px 12px;
-      font-size: 11px;
-      font-weight: 700;
-      border-radius: 8px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      transition: background 0.2s;
-    }
-    .btn-clear-all:active { background: #ffb4ae; }
-
-    .btn-delete-row {
-      background: transparent;
-      border: none;
-      color: var(--color-danger);
-      cursor: pointer;
-      padding: 4px;
-      border-radius: 6px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .btn-delete-row:hover { background: var(--color-danger-bg); }
-
-    .table-container {
-      overflow-x: auto;
-      padding: 0 16px 16px;
-    }
-    .db-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-      text-align: left;
-    }
-    .db-table th {
-      background: #F1F3F5;
-      padding: 10px;
-      font-weight: 700;
-      color: var(--md-text-secondary);
-      border-bottom: 2px solid var(--md-sys-color-outline);
-      white-space: nowrap;
-    }
-    .db-table td {
-      padding: 10px;
-      border-bottom: 1px solid var(--md-sys-color-outline);
-      color: var(--md-text-primary);
-      white-space: nowrap;
-    }
-    .badge {
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: 600;
-      font-size: 10px;
-    }
+    .counter-wrapper { display: flex; align-items: center; background: #F1F3F5; border-radius: 10px; padding: 2px; }
+    .counter-btn { width: 36px; height: 36px; border-radius: 8px; background: white; border: 1px solid var(--md-sys-color-outline); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .counter-input { font-size: 16px; font-weight: 700; width: 60px; text-align: center; border: none; background: transparent; outline: none; }
+    .status-banner { padding: 12px 16px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; border-radius: 12px; margin-top: 14px; justify-content: center; }
+    .btn-submit { width: 100%; background: var(--md-sys-color-primary); color: white; border: none; padding: 14px; font-size: 14px; font-weight: 600; border-radius: 12px; margin-top: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-clear-all { background: var(--color-danger-bg); color: var(--color-danger); border: 1px solid var(--color-danger); padding: 6px 12px; font-size: 11px; font-weight: 700; border-radius: 8px; cursor: pointer; }
+    .btn-delete-row { background: transparent; border: none; color: var(--color-danger); cursor: pointer; padding: 4px; }
+    .table-container { overflow-x: auto; padding: 0 16px 16px; }
+    .db-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
+    .db-table th { background: #F1F3F5; padding: 10px; font-weight: 700; color: var(--md-text-secondary); border-bottom: 2px solid var(--md-sys-color-outline); }
+    .db-table td { padding: 10px; border-bottom: 1px solid var(--md-sys-color-outline); }
+    .badge { padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 10px; }
     .badge-active { background: var(--color-success-bg); color: var(--color-success); }
     .badge-suspended { background: var(--color-danger-bg); color: var(--color-danger); }
   </style>
@@ -525,19 +180,9 @@
       <div class="form-row-2">
         <div class="input-group">
           <label for="hist-defeito">Histórico de Defeito</label>
-          <input type="text" id="hist-defeito" list="lista-defeitos-sugeridos" class="form-control" placeholder="Selecione ou escreva novo...">
+          <input type="text" id="hist-defeito" list="lista-defeitos-sugeridos" class="form-control" placeholder="Selecione ou escreva...">
           <datalist id="lista-defeitos-sugeridos">
-            <option value="Broken Pin">
-            <option value="Deformated / Bent">
-            <option value="Burr / Flashes">
-            <option value="Scratches / Surface Damage">
-            <option value="Contamination / Dirty">
-            <option value="Conductivity Variation">
-            <option value="Dimensional Non-Compliance">
-            <option value="Cracks / Fissures">
-            <option value="Terminal/Clip Non-Compliance">
-            <option value="Sealing Surface Integrity">
-            <option value="Oxidation / Rust">
+            <option value="Broken Pin"><option value="Deformated / Bent"><option value="Burr / Flashes"><option value="Scratches / Surface Damage"><option value="Contamination / Dirty"><option value="Conductivity Variation"><option value="Dimensional Non-Compliance"><option value="Cracks / Fissures"><option value="Terminal/Clip Non-Compliance"><option value="Sealing Surface Integrity"><option value="Oxidation / Rust">
           </datalist>
         </div>
         <div class="input-group">
@@ -554,7 +199,6 @@
       <div class="triagem-row">
         <div class="triagem-info">
           <span class="triagem-name">Quantidade Total Inspecionada</span>
-          <span class="triagem-desc">Quantidade física verificada da amostra</span>
         </div>
         <div class="counter-wrapper">
           <button class="counter-btn" onclick="stepTriagem('total-inspecionado', -1)"><i class="ti ti-minus"></i></button>
@@ -565,7 +209,6 @@
       <div class="triagem-row">
         <div class="triagem-info">
           <span class="triagem-name">Quantidade Total Rejeitada</span>
-          <span class="triagem-desc">Peças reprovadas encontradas</span>
         </div>
         <div class="counter-wrapper">
           <button class="counter-btn" onclick="stepTriagem('total-rejeitado', -1)"><i class="ti ti-minus"></i></button>
@@ -585,20 +228,7 @@
     </div>
     <div class="table-container">
       <table class="db-table">
-        <thead>
-          <tr>
-            <th>Control No.</th>
-            <th>Status</th>
-            <th>Start Date</th>
-            <th>Supplier</th>
-            <th>Part Number</th>
-            <th>Historical Defect</th>
-            <th>Inspection Method</th>
-            <th>Total Inspected</th>
-            <th>Total Rejected</th>
-            <th style="text-align: center;">Ações</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Control No.</th><th>Status</th><th>Start Date</th><th>Supplier</th><th>Part Number</th><th>Hist. Defect</th><th>Inspected</th><th>Rejected</th><th>Ações</th></tr></thead>
         <tbody id="db-rows"></tbody>
       </table>
     </div>
@@ -606,270 +236,94 @@
 </div>
 
 <script>
-  /* ==========================================================================
-     MOTOR DE CÁLCULO, REGRAS AQL & LOGICA DE OPERAÇÃO
-     ========================================================================== */
-  document.getElementById('date-inicio').valueAsDate = new Date();
+  // 1. MANIFEST DINÂMICO VIA BLOB
+  const manifest = {
+    "name": "AQL Inspection Tracker Pro",
+    "short_name": "AQL Tracker",
+    "display": "standalone",
+    "start_url": window.location.href,
+    "background_color": "#F8F9FA",
+    "theme_color": "#2196F3",
+    "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/2921/2921222.png", "sizes": "512x512", "type": "image/png" }]
+  };
+  const blobManifest = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+  document.getElementById('manifest-placeholder').href = URL.createObjectURL(blobManifest);
 
-  const DADOS_PADRAO = {
-    "290Y16052R": { supplier: "YAZAKI SYSTEMS TECHNOLOGIES", desc: "CONN-ELEC", defect: "Broken Pin", method: "Visual Control" },
-    "82003262249": { supplier: "UNITED SPRINGS SAS", desc: "SPRING-REVERSE BAULK", defect: "Deformated Spring", method: "Visual Control + Go/No-Go Gauge" },
-    "152415573R": { supplier: "BONTAZ CENTRE MAROC", desc: "VALVE-ENG OIL PUMP FLOW", defect: "Conductivity Variation", method: "Multimeter" },
-    "152418461R": { supplier: "BONTAZ CENTRE MAROC", desc: "VALVE-ENG OIL PUMP FLOW", defect: "Conductivity Variation", method: "Multimeter" },
-    "296833614R": { supplier: "YAZAKI SYSTEMS TECHNOLOGIES", desc: "HARN-MOTOR SIGNAL CONN BASE", defect: "Terminal/Clip Non-Compliance", method: "Visual Control" },
-    "294324PM0A": { supplier: "EGANA 2 S.L.", desc: "HSG ASSY-TRACTION MOTOR CLOSING PARTIAL", defect: "Sealing Surface Integrity", method: "Visual Control" }
+  // 2. SERVICE WORKER DINÂMICO VIA BLOB
+  if ('serviceWorker' in navigator) {
+    const swCode = `self.addEventListener('fetch', () => {});`;
+    const blobSW = new Blob([swCode], {type: 'application/javascript'});
+    navigator.serviceWorker.register(URL.createObjectURL(blobSW));
+  }
+
+  // Lógica do App
+  document.getElementById('date-inicio').valueAsDate = new Date();
+  let DADOS_CONHECIDOS = JSON.parse(localStorage.getItem('aql_tracker_parts')) || {
+    "290Y16052R": { supplier: "YAZAKI", desc: "CONN-ELEC", defect: "Broken Pin", method: "Visual Control" }
   };
 
-  let DADOS_CONHECIDOS = JSON.parse(localStorage.getItem('aql_tracker_parts')) || DADOS_PADRAO;
-
-  const DB = [
-    { min: 1,    s: 32,  a25: 1, r25: 2, a15: 0, r15: 1, a10: 0, r10: 1 },
-    { min: 200,  s: 50,  a25: 2, r25: 3, a15: 1, r15: 2, a10: 0, r10: 1 },
-    { min: 500,  s: 80,  a25: 3, r25: 4, a15: 2, r15: 3, a10: 1, r10: 2 },
-    { min: 1200, s: 125, a25: 5, r25: 6, a15: 3, r15: 4, a10: 2, r10: 3 },
-    { min: 3200, s: 200, a25: 7, r25: 8, a15: 5, r15: 6, a10: 3, r10: 4 }
-  ];
-
+  const DB = [{ min: 1, s: 32, a25: 1, r25: 2, a15: 0, r15: 1, a10: 0, r10: 1 }, { min: 200, s: 50, a25: 2, r25: 3, a15: 1, r15: 2, a10: 0, r10: 1 }, { min: 500, s: 80, a25: 3, r25: 4, a15: 2, r15: 3, a10: 1, r10: 2 }, { min: 1200, s: 125, a25: 5, r25: 6, a15: 3, r15: 4, a10: 2, r10: 3 }, { min: 3200, s: 200, a25: 7, r25: 8, a15: 5, r15: 6, a10: 3, r10: 4 }];
   let limiteRejeitar = 0;
-  let tamanhoAmostraCorrente = 0;
 
-  function lookup(lot) {
-    let r = DB[0];
-    for (const x of DB) { if (lot >= x.min) r = x; else break; }
-    return r;
-  }
+  function lookup(lot) { let r = DB[0]; for (const x of DB) { if (lot >= x.min) r = x; else break; } return r; }
+  function step(id, d) { document.getElementById(id).value = Math.min(Math.max((+document.getElementById(id).value || 1) + d, 1), 10); calc(); }
+  function stepTriagem(id, d) { document.getElementById(id).value = Math.max((+document.getElementById(id).value || 0) + d, 0); validarTriagem(); }
   
-  function clamp(v, a, b) { return Math.min(Math.max(v, a), b); }
-  
-  function step(id, d) {
-    const el = document.getElementById(id);
-    el.value = clamp((+el.value || 1) + d, 1, 10);
-    calc();
-  }
-
-  function stepTriagem(id, d) {
-    const el = document.getElementById(id);
-    el.value = Math.max((+el.value || 0) + d, 0);
-    validarTriagem();
-  }
-
-  function autoCompletePart() {
-    const pn = document.getElementById('part-number').value.trim();
-    if (DADOS_CONHECIDOS[pn]) {
-      document.getElementById('supplier').value = DADOS_CONHECIDOS[pn].supplier || '';
-      document.getElementById('description').value = DADOS_CONHECIDOS[pn].desc || '';
-      document.getElementById('hist-defeito').value = DADOS_CONHECIDOS[pn].defect || '';
-      document.getElementById('metodo-inspecao').value = DADOS_CONHECIDOS[pn].method || '';
-    }
-  }
-
-  function validarTriagem() {
-    const inspecionado = +document.getElementById('total-inspecionado').value || 0;
-    const rejeitado = +document.getElementById('total-rejeitado').value || 0;
-    const banner = document.getElementById('triagem-status-banner');
-
-    if (inspecionado === 0 && rejeitado === 0) {
-      banner.style.cssText = 'background: #F1F3F5; color: var(--md-text-secondary);';
-      banner.innerHTML = '<i class="ti ti-hourglass"></i> Aguardando inserção de dados...';
-    } else if (rejeitado >= limiteRejeitar) {
-      banner.style.cssText = 'background: var(--color-danger-bg); color: var(--color-danger);';
-      banner.innerHTML = `<i class="ti ti-circle-x"></i> Lote Rejeitado (Rejeitado ≥ ${limiteRejeitar})`;
-    } else {
-      banner.style.cssText = 'background: var(--color-success-bg); color: var(--color-success);';
-      banner.innerHTML = `<i class="ti ti-circle-check"></i> Lote Aceito sob Amostragem`;
-    }
-  }
-
   function calc() {
-    const S = clamp(+document.getElementById('sev').value || 1, 1, 10);
-    const O = clamp(+document.getElementById('occ').value || 1, 1, 10);
-    const D = clamp(+document.getElementById('det').value || 1, 1, 10);
+    const S = +document.getElementById('sev').value, O = +document.getElementById('occ').value, D = +document.getElementById('det').value;
     const lot = Math.max(+document.getElementById('lot').value || 1, 1);
-    const hist = document.getElementById('hist').value;
     const rpn = S * O * D;
-    
     const cat = rpn >= 50 || S === 10 ? 'A' : rpn < 36 ? 'C' : 'B';
-    const pill = document.getElementById('cat-pill');
-    const msg = document.getElementById('result-msg');
-    const rc = document.getElementById('result-card');
-    const met = document.getElementById('metrics');
-    const triagemCard = document.getElementById('triagem-card');
+    const pill = document.getElementById('cat-pill'), rc = document.getElementById('result-card'), met = document.getElementById('metrics'), triagemCard = document.getElementById('triagem-card');
     
-    if (cat === 'A') {
-      pill.style.cssText = 'background:var(--color-danger-bg); color:var(--color-danger);';
-      pill.innerHTML = '<i class="ti ti-alert-triangle"></i> Categoria A — Alto Risco';
-      rc.style.borderColor = 'var(--color-danger)';
-      msg.textContent = 'Aviso: RPN elevado ou falha crítica. Categoria A. Prosseguir com inspeção a 100% de todo o lote.';
-      met.style.display = 'none';
-      triagemCard.style.display = 'none';
-    } else if (cat === 'C') {
-      pill.style.cssText = 'background:var(--color-success-bg); color:var(--color-success);';
-      pill.innerHTML = '<i class="ti ti-circle-check"></i> Categoria C — Baixo Risco';
-      rc.style.borderColor = 'var(--color-success)';
-      msg.textContent = 'Baixo risco: Categoria C. Prosseguir com uma auditoria por amostragem (1 a 2 meses).';
-      met.style.display = 'none';
-      triagemCard.style.display = 'none';
+    if (cat !== 'B') {
+      pill.innerHTML = cat === 'A' ? 'Categoria A - Alto Risco' : 'Categoria C - Baixo Risco';
+      met.style.display = 'none'; triagemCard.style.display = 'none';
     } else {
-      const aql = hist === 'Normal' ? '2.5' : hist === 'NCs Menores' ? '1.5' : '1.0';
       const row = lookup(lot);
-      const sm = row.s;
-      const ac = aql === '2.5' ? row.a25 : aql === '1.5' ? row.a15 : row.a10;
-      const re = aql === '2.5' ? row.r25 : aql === '1.5' ? row.r15 : row.r10;
-      
-      limiteRejeitar = re;
-      tamanhoAmostraCorrente = sm;
-
-      document.getElementById('total-inspecionado').value = sm;
-
-      pill.style.cssText = 'background:var(--color-info-bg); color:var(--color-info);';
-      pill.innerHTML = '<i class="ti ti-info-circle"></i> Categoria B — Risco Moderado';
-      rc.style.borderColor = 'var(--color-info)';
-      msg.textContent = 'Plano AQL dinâmico estabelecido. Realize a triagem e insira as peças reprovadas abaixo.';
-      
-      met.style.display = 'grid';
-      met.innerHTML = `
-        <div class="met"><span class="met-lbl">Nível AQL</span><span class="met-val">${aql}<span class="met-unit"> %</span></span></div>
-        <div class="met"><span class="met-lbl">Amostra</span><span class="met-val">${sm}<span class="met-unit"> pcs</span></span></div>
-        <div class="met"><span class="met-lbl">Aceitar (Ac)</span><span class="met-val" style="color:var(--color-success)">≤ ${ac}<span class="met-unit"> def.</span></span></div>
-        <div class="met"><span class="met-lbl">Rejeitar (Re)</span><span class="met-val" style="color:var(--color-danger)">≥ ${re}<span class="met-unit"> def.</span></span></div>
-      `;
-
-      triagemCard.style.display = 'block';
+      limiteRejeitar = (document.getElementById('hist').value === 'Normal' ? row.r25 : document.getElementById('hist').value === 'NCs Menores' ? row.r15 : row.r10);
+      document.getElementById('total-inspecionado').value = row.s;
+      met.style.display = 'grid'; triagemCard.style.display = 'block';
       validarTriagem();
     }
   }
 
-  function carregarBancoDados() {
-    const dados = JSON.parse(localStorage.getItem('aql_tracker_db')) || [];
-    const tbody = document.getElementById('db-rows');
-    tbody.innerHTML = '';
-
-    if (dados.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color:gray; padding:20px;">Nenhum registro salvo na base de dados local.</td></tr>';
-      return;
-    }
-
-    dados.forEach((item, index) => {
-      const tr = document.createElement('tr');
-      const badgeClass = item.status === 'ACTIVE' ? 'badge-active' : 'badge-suspended';
-      tr.innerHTML = `
-        <td><b>#${item.id}</b></td>
-        <td><span class="badge ${badgeClass}">${item.status}</span></td>
-        <td>${item.data}</td>
-        <td>${item.supplier || '-'}</td>
-        <td>${item.partNumber || '-'}</td>
-        <td>${item.defeito || '-'}</td>
-        <td>${item.metodo || '-'}</td>
-        <td>${item.inspected} pcs</td>
-        <td style="color:${item.rejected > 0 ? 'var(--color-danger)' : 'var(--color-success)'}; font-weight:bold;">${item.rejected} pcs</td>
-        <td style="text-align: center;">
-          <button class="btn-delete-row" onclick="eliminarRegistoIndividual(${index}, ${item.id})" title="Eliminar este registo">
-            <i class="ti ti-trash"></i>
-          </button>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
+  function validarTriagem() {
+    const rej = +document.getElementById('total-rejeitado').value || 0;
+    const banner = document.getElementById('triagem-status-banner');
+    banner.innerHTML = rej >= limiteRejeitar ? '❌ Lote Rejeitado' : '✅ Lote Aceito';
+    banner.style.background = rej >= limiteRejeitar ? 'var(--color-danger-bg)' : 'var(--color-success-bg)';
   }
 
   function salvarRegistro() {
-    const dados = JSON.parse(localStorage.getItem('aql_tracker_db')) || [];
-    const pNumber = document.getElementById('part-number').value.trim();
-    const splier = document.getElementById('supplier').value.trim();
-    const descItem = document.getElementById('description').value.trim();
-    const defeitoItem = document.getElementById('hist-defeito').value.trim();
-    const metodoItem = document.getElementById('metodo-inspecao').value.trim();
-
-    if (!pNumber || !splier) {
-      alert("Por favor, preencha pelo menos o Part Number e o Supplier antes de salvar.");
-      return;
-    }
-
-    const novoRegistro = {
-      id: dados.length > 0 ? Math.max(...dados.map(d => d.id)) + 1 : 1,
+    let dados = JSON.parse(localStorage.getItem('aql_tracker_db')) || [];
+    dados.push({
+      id: dados.length + 1,
       status: document.getElementById('status-item').value,
       data: document.getElementById('date-inicio').value,
-      supplier: splier,
-      partNumber: pNumber,
-      defeito: defeitoItem,
-      metodo: metodoItem,
-      inspected: +document.getElementById('total-inspecionado').value || 0,
-      rejected: +document.getElementById('total-rejeitado').value || 0
-    };
-
-    // Atualiza base de dados de auto-preenchimento para este part number
-    DADOS_CONHECIDOS[pNumber] = {
-      supplier: splier,
-      desc: descItem,
-      defect: defeitoItem,
-      method: metodoItem
-    };
-
-    dados.push(novoRegistro);
-    localStorage.setItem('aql_tracker_db', JSON.stringify(dados));
-    localStorage.setItem('aql_tracker_parts', JSON.stringify(DADOS_CONHECIDOS));
-    
-    alert(`Sucesso! Registro #${novoRegistro.id} salvo com sucesso.`);
-    document.getElementById('total-rejeitado').value = 0;
-    
-    carregarBancoDados();
-    calc();
-  }
-
-  function eliminarRegistoIndividual(indexNoArray, idDoRegisto) {
-    const confirmar = confirm(`Tem a certeza de que deseja eliminar o registo #${idDoRegisto}? Esta ação não pode ser desfeita.`);
-    if (confirmar) {
-      let dados = JSON.parse(localStorage.getItem('aql_tracker_db')) || [];
-      dados.splice(indexNoArray, 1);
-      localStorage.setItem('aql_tracker_db', JSON.stringify(dados));
-      carregarBancoDados();
-    }
-  }
-
-  function limparHistoricoCompleto() {
-    const primeiraConfirmacao = confirm("⚠️ ATENÇÃO: Deseja realmente APAGAR TODO o histórico de inspeções do Tracker?");
-    if (primeiraConfirmacao) {
-      const segundaConfirmacao = confirm("CUIDADO! Esta ação é irreversível. Todos os registos guardados na tabela real-time serão destruídos permanentemente. Continuar?");
-      if (segundaConfirmacao) {
-        localStorage.removeItem('aql_tracker_db');
-        carregarBancoDados();
-        alert("Base de dados de histórico limpa com sucesso!");
-      }
-    }
-  }
-
-  /* ==========================================================================
-     SERVICE WORKER INTERNO (PWA)
-     ========================================================================== */
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      const swCode = `
-        const CACHE_NAME = 'aql-tracker-single-v1';
-        const ASSETS = [
-          location.href,
-          'https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css'
-        ];
-        self.addEventListener('install', (e) => {
-          e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));
-        });
-        self.addEventListener('activate', (e) => {
-          e.waitUntil(caches.keys().then((keys) => Promise.all(
-            keys.map((k) => { if(k !== CACHE_NAME) return caches.delete(k); })
-          )));
-        });
-        self.addEventListener('fetch', (e) => {
-          e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request)));
-        });
-      `;
-      const blob = new Blob([swCode], { type: 'application/javascript' });
-      const swUrl = URL.createObjectURL(blob);
-      navigator.serviceWorker.register(swUrl).catch(err => console.error('PWA Error:', err));
+      supplier: document.getElementById('supplier').value,
+      partNumber: document.getElementById('part-number').value,
+      inspected: document.getElementById('total-inspecionado').value,
+      rejected: document.getElementById('total-rejeitado').value
     });
+    localStorage.setItem('aql_tracker_db', JSON.stringify(dados));
+    carregarBancoDados();
   }
 
-  // Inicialização do App
-  calc();
-  carregarBancoDados();
+  function carregarBancoDados() {
+    const dados = JSON.parse(localStorage.getItem('aql_tracker_db')) || [];
+    document.getElementById('db-rows').innerHTML = dados.map((i, idx) => `<tr><td>#${i.id}</td><td>${i.status}</td><td>${i.data}</td><td>${i.supplier}</td><td>${i.partNumber}</td><td>${i.inspected}</td><td>${i.rejected}</td><td><button class="btn-delete-row" onclick="eliminar(${idx})"><i class="ti ti-trash"></i></button></td></tr>`).join('');
+  }
+
+  function eliminar(idx) {
+    let d = JSON.parse(localStorage.getItem('aql_tracker_db'));
+    d.splice(idx, 1); localStorage.setItem('aql_tracker_db', JSON.stringify(d));
+    carregarBancoDados();
+  }
+
+  function limparHistoricoCompleto() { if(confirm("Apagar tudo?")) { localStorage.removeItem('aql_tracker_db'); carregarBancoDados(); } }
+
+  calc(); carregarBancoDados();
 </script>
 </body>
 </html>

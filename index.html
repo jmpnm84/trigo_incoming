@@ -5,7 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>AQL Inspection Tracker Pro</title>
   
-  <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkFRTCBJbnNwZWN0aW9uIFRyYWNrZXIgUHJvIiwKICAic2hvcnRfbmFtZSI6ICJBUUwgVHJhY2tlciIsCiAgImRlcmlwdGlvbiI6ICJCYXNlIGRlIGRhZG9zIGUgdHJpYWgelW0gb3BlcmFjaW9uYWwgZGUgaW5zcGVnw6PbyBkZSBlbmdlbmhhcmlhIGRlIHF1YWxpZGFkZS4iLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI0Y4RjlGQSIsCiAgInRoZW1lX2NvbG9yIjogIiMyMTk2RjMiLAogICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vZ2l0aHViLmNvbS91c2VyLWF0dGFjaG1lbnRzL2Fzc2V0cy83ODc5MDA3MS05M2YyLTRkZTctOGRiNC1kY2I4Y2MyOGI0NWIiLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSIsCiAgICAgICJmb3JjZV9kb3duaG9hZCI6IGZhbHNlCiAgICB9CiAgXQp9">
+  <link rel="manifest" href='data:application/manifest+json,{
+    "name": "AQL Inspection Tracker Pro",
+    "short_name": "AQL Tracker",
+    "description": "Base de dados e triagem operacional de inspeção de engenharia de qualidade.",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#F8F9FA",
+    "theme_color": "#2196F3",
+    "orientation": "portrait",
+    "icons": [
+      {
+        "src": "https://github.com/user-attachments/assets/78790071-93f2-4de7-8db4-dcb8cc28b45b",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any maskable",
+        "force_download": false
+      }
+    ]
+  }'>
   
   <meta name="theme-color" content="#2196F3">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -555,7 +573,7 @@
             <th>Inspection Method</th>
             <th>Total Inspected</th>
             <th>Total Rejected</th>
-            <th style="text-align: center;">Ações</th>
+            <th>Ações</th>
           </tr>
         </thead>
         <tbody id="db-rows"></tbody>

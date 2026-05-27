@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>AQL Inspection Tracker Pro</title>
   
-  <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkFRTCBJbnNwZWN0aW9uIFRyYWNrZXIgUHJvIiwKICAic2hvcnRfbmFtZSI6ICJBUUwgVHJhY2tlciIsCiAgImRlcmlwdGlvbiI6ICJCYXNlIGRlIGRhZG9zIGUgdHJpYWgelW0gb3BlcmFjaW9uYWwgZGUgaW5zcGVnw6PbyBkZSBlbmdlbmhhcmlhIGRlIHF1YWxpZGFkZS4iLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI0Y4RjlGQSIsCiAgInRoZW1lX2NvbG9yIjogIiMyMTk2RjMiLAogICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vZ2l0aHViLmNvbS91c2VyLWF0dGFjaG1lbnRzL2Fzc2V0cy83ODc5MDA3MS05M2YyLTRkZTctOGRiNC1kY2I4Y2MyOGI0NWIiLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSIsCiAgICAgICJmb3JjZV9kb3duaG9hZCI6IGZhbHNlCiAgICB9CiAgXQp9">
+  <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkFRTCBJbnNwZWN0aW9uIFRyYWNrZXIgUHJvIiwKICAic2hvcnRfbmFtZSI6ICJBUUwgVHJhY2tlciIsCiAgImRlcmlwdGlvbiI6ICJCYXNlIGRlIGRhZG9zIGUgdHJpYWgelW0gb3BlcmFjaW9uYWwgZGUgaW5zcGVnw6PbyBkZSBlbmdlbmhhcmlhIGRlIHF1YWxpZGFkZS4iLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI0Y4RjlGQSIsCiAgInRoZW1lX2NvbG9yIjogIiMyMTk2RjMiLAogICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vZ2l0aHViLmNvbS91c2VyLWF0dGFjaG1lbnRzL2Fzc2V0cy83ODc5MDA3MS05M2YyLTRkZTctOGRiNC1kY2I4Y2MyOGI0NWIiLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXMaskYWJsZSIsCiAgICAgICJmb3JjZV9kb3duaG9hZCI6IGZhbHNlCiAgICB9CiAgXQp9">
   
   <meta name="theme-color" content="#2196F3">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -68,21 +68,14 @@
       gap: 14px;
       padding: 8px 4px 20px;
     }
-    /* Estilos do contentor do logótipo adaptados para imagem e fallback de ícone */
     .hdr-icon {
-      width: 46px;
-      height: 46px;
+      width: 44px;
+      height: 44px;
       border-radius: 12px;
       background: var(--md-sys-color-primary);
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
-    }
-    .hdr-icon img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
     }
     .hdr-icon i {
       color: var(--md-sys-color-on-primary);
@@ -105,6 +98,7 @@
       margin-bottom: 16px;
       box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.05);
       overflow: hidden;
+      transition: border-color 0.2s ease;
     }
     .card-hdr {
       padding: 14px 16px;
@@ -396,7 +390,7 @@
 
 <div class="app">
   <header class="hdr">
-    <div class="hdr-icon" id="app-logo-container"></div>
+    <div class="hdr-icon"><i class="ti ti-database"></i></div>
     <div class="hdr-text">
       <h1>AQL Inspector Tracker</h1>
       <p>Base de dados e triagem operacional</p>
@@ -544,6 +538,12 @@
     </div>
   </section>
 
+  <section class="card" id="global-submit-card" style="display: none;">
+    <div style="padding: 16px;">
+      <button class="btn-submit" onclick="salvarRegistro()"><i class="ti ti-device-floppy"></i> Salvar e Registrar no Tracker</button>
+    </div>
+  </section>
+
   <section class="card">
     <div class="card-hdr">
       <span>Base de Dados Real-Time (Histórico)</span>
@@ -573,29 +573,6 @@
 
 <script>
   /* ==========================================================================
-     CONFIGURAÇÃO DO LOGÓTIPO PERSONALIZADO VIA LINK
-     ========================================================================== */
-  // 🔽 COLA O LINK DA TUA IMAGEM/LOGÓTIPO AQUI ENTRE AS ASPAS 🔽
-  const URL_LOGOTIPO_PERSONALIZADO = "https://github.com/user-attachments/assets/e4e16378-571e-444d-94ef-916a51a81675"; 
-
-  function inicializarLogotipo() {
-    const container = document.getElementById('app-logo-container');
-    if (URL_LOGOTIPO_PERSONALIZADO && URL_LOGOTIPO_PERSONALIZADO.trim() !== "" && URL_LOGOTIPO_PERSONALIZADO !== "https://github.com/user-attachments/assets/e4e16378-571e-444d-94ef-916a51a81675") {
-      const img = document.createElement('img');
-      img.src = URL_LOGOTIPO_PERSONALIZADO;
-      img.alt = "Logo";
-      // Fallback: se a imagem do link falhar ou não carregar, volta a colocar o ícone nativo automaticamente
-      img.onerror = function() {
-        container.innerHTML = '<i class="ti ti-database"></i>';
-      };
-      container.appendChild(img);
-    } else {
-      // Ícone padrão caso o link esteja vazio
-      container.innerHTML = '<i class="ti ti-database"></i>';
-    }
-  }
-
-  /* ==========================================================================
      MOTOR DE CÁLCULO, REGRAS AQL & LOGICA DE OPERAÇÃO
      ========================================================================== */
   document.getElementById('date-inicio').valueAsDate = new Date();
@@ -620,7 +597,7 @@
   ];
 
   let limiteRejeitar = 0;
-  let tamanhoAmostraCorrente = 0;
+  let categoriaAtual = 'C';
 
   function lookup(lot) {
     let r = DB[0];
@@ -653,6 +630,8 @@
   }
 
   function validarTriagem() {
+    if (categoriaAtual !== 'B') return;
+
     const inspecionado = +document.getElementById('total-inspecionado').value || 0;
     const rejeitado = +document.getElementById('total-rejeitado').value || 0;
     const banner = document.getElementById('triagem-status-banner');
@@ -677,27 +656,39 @@
     const hist = document.getElementById('hist').value;
     const rpn = S * O * D;
     
-    const cat = rpn >= 50 || S === 10 ? 'A' : rpn < 36 ? 'C' : 'B';
+    categoriaAtual = rpn >= 50 || S === 10 ? 'A' : rpn < 36 ? 'C' : 'B';
+    
     const pill = document.getElementById('cat-pill');
     const msg = document.getElementById('result-msg');
     const rc = document.getElementById('result-card');
     const met = document.getElementById('metrics');
     const triagemCard = document.getElementById('triagem-card');
+    const globalSubmitCard = document.getElementById('global-submit-card');
     
-    if (cat === 'A') {
+    if (categoriaAtual === 'A') {
       pill.style.cssText = 'background:var(--color-danger-bg); color:var(--color-danger);';
       pill.innerHTML = '<i class="ti ti-alert-triangle"></i> Categoria A — Alto Risco';
       rc.style.borderColor = 'var(--color-danger)';
       msg.textContent = 'Aviso: RPN elevado ou falha crítica. Categoria A. Prosseguir com inspeção a 100% de todo o lote.';
+      
+      // Para Categoria A, a amostra inspecionada padrão é o lote completo
+      document.getElementById('total-inspecionado').value = lot;
+      
       met.style.display = 'none';
       triagemCard.style.display = 'none';
-    } else if (cat === 'C') {
+      globalSubmitCard.style.display = 'block';
+    } else if (categoriaAtual === 'C') {
       pill.style.cssText = 'background:var(--color-success-bg); color:var(--color-success);';
       pill.innerHTML = '<i class="ti ti-circle-check"></i> Categoria C — Baixo Risco';
       rc.style.borderColor = 'var(--color-success)';
       msg.textContent = 'Baixo risco: Categoria C. Prosseguir com uma auditoria por amostragem (1 a 2 meses).';
+      
+      // Para Categoria C, define valor padrão ou 0 para auditorias periódicas
+      document.getElementById('total-inspecionado').value = 0;
+      
       met.style.display = 'none';
       triagemCard.style.display = 'none';
+      globalSubmitCard.style.display = 'block';
     } else {
       const aql = hist === 'Normal' ? '2.5' : hist === 'NCs Menores' ? '1.5' : '1.0';
       const row = lookup(lot);
@@ -706,8 +697,6 @@
       const re = aql === '2.5' ? row.r25 : aql === '1.5' ? row.r15 : row.r10;
       
       limiteRejeitar = re;
-      tamanhoAmostraCorrente = sm;
-
       document.getElementById('total-inspecionado').value = sm;
 
       pill.style.cssText = 'background:var(--color-info-bg); color:var(--color-info);';
@@ -724,6 +713,7 @@
       `;
 
       triagemCard.style.display = 'block';
+      globalSubmitCard.style.display = 'none';
       validarTriagem();
     }
   }
@@ -738,7 +728,12 @@
       return;
     }
 
-    dados.forEach((item, index) => {
+    // Listar do mais recente para o mais antigo
+    const dadosOrdenados = [...dados].reverse();
+
+    dadosOrdenados.forEach((item, index) => {
+      // Mapear o index real do array original para a exclusão correta
+      const indexOriginal = dados.length - 1 - index;
       const tr = document.createElement('tr');
       const badgeClass = item.status === 'ACTIVE' ? 'badge-active' : 'badge-suspended';
       tr.innerHTML = `
@@ -752,7 +747,7 @@
         <td>${item.inspected} pcs</td>
         <td style="color:${item.rejected > 0 ? 'var(--color-danger)' : 'var(--color-success)'}; font-weight:bold;">${item.rejected} pcs</td>
         <td style="text-align: center;">
-          <button class="btn-delete-row" onclick="eliminarRegistoIndividual(${index}, ${item.id})" title="Eliminar este registo">
+          <button class="btn-delete-row" onclick="eliminarRegistoIndividual(${indexOriginal}, ${item.id})" title="Eliminar este registo">
             <i class="ti ti-trash"></i>
           </button>
         </td>
@@ -786,6 +781,7 @@
       rejected: +document.getElementById('total-rejeitado').value || 0
     };
 
+    // Atualiza base de dados de auto-preenchimento para este part number
     DADOS_CONHECIDOS[pNumber] = {
       supplier: splier,
       desc: descItem,
@@ -798,6 +794,8 @@
     localStorage.setItem('aql_tracker_parts', JSON.stringify(DADOS_CONHECIDOS));
     
     alert(`Sucesso! Registro #${novoRegistro.id} salvo com sucesso.`);
+    
+    // Limpar contadores de rejeição após salvar
     document.getElementById('total-rejeitado').value = 0;
     
     carregarBancoDados();
@@ -856,7 +854,6 @@
   }
 
   // Inicialização do App
-  inicializarLogotipo();
   calc();
   carregarBancoDados();
 </script>

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>AQL Inspection Tracker Pro</title>
   
-  <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkFRTCBJbnNwZWN0aW9uIFRyYWNrZXIgUHJvIiwKICAic2hvcnRfbmFtZSI6ICJBUUwgVHJhY2tlciIsCiAgImRlcmlwdGlvbiI6ICJCYXNlIGRlIGRhZG9zIGUgdHJpYWgelW0gb3BlcmFjaW9uYWwgZGUgaW5zcGVnw6PbyBkZSBlbmdlbmhhcmlhIGRlIHF1YWxpZGFkZS4iLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI0Y4RjlGQSIsCiAgInRoZW1lX2NvbG9yIjogIiMyMTk2RjMiLAogICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vZ2l0aHViLmNvbS91c2VyLWF0dGFjaG1lbnRzL2Fzc2V0cy83ODc5MDA3MS05M2YyLTRkZTctOGRiNC1kY2I4Y2MyOGI0NWIiLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXMaskYWJsZSIsCiAgICAgICJmb3JjZV9kb3duaG9hZCI6IGZhbHNlCiAgICB9CiAgXQp9">
+  <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkFRTCBJbnNwZWN0aW9uIFRyYWNrZXIgUHJvIiwKICAic2hvcnRfbmFtZSI6ICJBUUwgVHJhY2tlciIsCiAgImRlcmlwdGlvbiI6ICJCYXNlIGRlIGRhZG9zIGUgdHJpYWgelW0gb3BlcmFjaW9uYWwgZGUgaW5zcGVnw6PbyBkZSBlbmdlbmhhcmlhIGRlIHF1YWxpZGFkZS4iLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI0Y4RjlGQSIsCiAgInRoZW1lX2NvbG9yIjogIiMyMTk2RjMiLAogICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vZ2l0aHViLmNvbS91c2VyLWF0dGFjaG1lbnRzL2Fzc2V0cy83ODc5MDA3MS05M2YyLTRkZTctOGRiNC1kY2I4Y2MyOGI0NWIiLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSIsCiAgICAgICJmb3JjZV9kb3duaG9hZCI6IGZhbHNlCiAgICB9CiAgXQp9">
   
   <meta name="theme-color" content="#2196F3">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -20,7 +20,7 @@
     :root {
       --md-sys-color-primary: #2196F3;
       --md-sys-color-on-primary: #FFFFFF;
-      --md-sys-color-surface: #FFFFFF;
+      --md-sys-color-surface: #F8F9FA;
       --md-sys-color-surface-variant: #FFFFFF;
       --md-sys-color-outline: #E0E0E0;
       
@@ -65,9 +65,21 @@
     .hdr {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: 14px;
       padding: 8px 4px 20px;
+    }
+    .hdr-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--md-sys-color-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hdr-icon i {
+      color: var(--md-sys-color-on-primary);
+      font-size: 22px;
     }
     .hdr-text h1 {
       font-size: 20px;
@@ -77,11 +89,6 @@
     .hdr-text p {
       font-size: 13px;
       color: var(--md-text-secondary);
-    }
-    .hdr-logo {
-      height: 40px;
-      width: auto;
-      object-fit: contain;
     }
 
     .card {
@@ -382,11 +389,11 @@
 
 <div class="app">
   <header class="hdr">
+    <div class="hdr-icon"><i class="ti ti-database"></i></div>
     <div class="hdr-text">
       <h1>AQL Inspector Tracker</h1>
       <p>Base de dados e triagem operacional</p>
     </div>
-    <img src="https://github.com/user-attachments/assets/e4e16378-571e-444d-94ef-916a51a81675" alt="Logo" class="hdr-logo">
   </header>
 
   <section class="card">

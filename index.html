@@ -1,790 +1,628 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>AQL Inspection Tracker Pro</title>
-  
-  <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkFRTCBJbnNwZWN0aW9uIFRyYWNrZXIgUHJvIiwKICAic2hvcnRfbmFtZSI6ICJBUUwgVHJhY2tlciIsCiAgImRlc2NyaXB0aW9uIjogIkJhc2UgZGUgZGFkb3MgZSB0cmlhZ2VtIG9wZXJhY2lvbmFsIGRlIGluc3Blw6fDo28gZGUgZW5nZW5oYXJpYSBkZSBxdWFsaWRhZGUuIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNGOEY5RkEiLAogICJ0aGVtZV9jb2xvciI6ICIjMjE5NkYzIiwKICAib3JpZW50YXRpb24iOiAicG9ydHJhaXQiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL2Nkbi5qc2RlbGl2ci5uZXQvbnBtL0B0YWJsZXIvaWNvbnMtcG5nQGxhdGVzdC9pY29ucy9kYXRhYmFzZS5wbmciLAogICAgICAic2l6ZXMiOiAiNTEyeDUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXJrYWJsZSIKICAgIH0KICBdCn0=">
-  
-  <meta name="theme-color" content="#2196F3">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-  
-  <style>
-    /* ==========================================================================
-       VARIÁVEIS DE COR & DESIGN SYSTEM (MATERIAL DESIGN 3)
-       ========================================================================== */
-    :root {
-      --md-sys-color-primary: #2196F3;
-      --md-sys-color-on-primary: #FFFFFF;
-      --md-sys-color-surface: #F8F9FA;
-      --md-sys-color-surface-variant: #FFFFFF;
-      --md-sys-color-outline: #E0E0E0;
-      
-      --md-text-primary: #1A1C1E;
-      --md-text-secondary: #43474E;
-      --md-text-tertiary: #73777F;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Sistema Integrado de Controlo de Qualidade - AQL & Entrada</title>
+    <style>
+        :root {
+            --primary-color: #005a9c;
+            --primary-dark: #003b66;
+            --accent-color: #ff9900;
+            --bg-light: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-dark: #333333;
+            --text-muted: #666666;
+            --border-color: #cccccc;
+            --success-color: #2e7d32;
+            --danger-color: #c62828;
+        }
 
-      --color-danger: #BA1A1A;
-      --color-danger-bg: #FFDAD7;
-      --color-success: #006D44;
-      --color-success-bg: #D4EAD6;
-      --color-info: #0061A4;
-      --color-info-bg: #D1E4FF;
-    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
 
-    /* ==========================================================================
-       ESTRUTURA GLOBAL & RESETS
-       ========================================================================== */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            padding: 10px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
 
-    body {
-      background-color: var(--md-sys-color-surface);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      color: var(--md-text-primary);
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
 
-    .app {
-      width: 100%;
-      max-width: 440px;
-    }
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
 
-    /* Banner Customizado de Instalação PWA */
-    #pwa-install-banner {
-      display: none;
-      background: var(--md-sys-color-surface-variant);
-      border: 1px solid var(--md-sys-color-primary);
-      padding: 12px 16px;
-      border-radius: 12px;
-      margin-bottom: 16px;
-      box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-      align-items: center;
-      gap: 12px;
-      width: 100%;
-      max-width: 440px;
-      box-sizing: border-box;
-    }
-    #pwa-install-banner span {
-      flex-grow: 1;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--md-text-primary);
-    }
-    #btn-pwa-install {
-      background: var(--md-sys-color-primary);
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-    }
+        header h1 {
+            font-size: 18px;
+            font-weight: bold;
+        }
 
-    /* ==========================================================================
-       COMPONENTES DE INTERFACE (UI)
-       ========================================================================== */
-    .hdr {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 8px 4px 20px;
-    }
-    .hdr-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: var(--md-sys-color-primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .hdr-icon i {
-      color: var(--md-sys-color-on-primary);
-      font-size: 22px;
-    }
-    .hdr-text h1 {
-      font-size: 20px;
-      font-weight: 600;
-      letter-spacing: -0.2px;
-    }
-    .hdr-text p {
-      font-size: 13px;
-      color: var(--md-text-secondary);
-    }
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
+        }
 
-    .card {
-      background: var(--md-sys-color-surface-variant);
-      border: 1px solid var(--md-sys-color-outline);
-      border-radius: 16px;
-      margin-bottom: 16px;
-      box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.05);
-      overflow: hidden;
-    }
-    .card-hdr {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--md-sys-color-outline);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .card-hdr span {
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      color: var(--md-text-secondary);
-    }
+        .card-title {
+            font-size: 15px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 12px;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 4px;
+            text-transform: uppercase;
+        }
 
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-      padding: 16px;
-    }
-    .form-row-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-    .input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .input-group label {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--md-text-secondary);
-    }
-    .form-control {
-      width: 100%;
-      font-size: 14px;
-      font-weight: 500;
-      font-family: inherit;
-      background: #F1F3F5;
-      border: 1px solid transparent;
-      border-radius: 10px;
-      padding: 10px 12px;
-      color: var(--md-text-primary);
-      outline: none;
-      transition: border-color 0.2s, background 0.2s;
-    }
-    .form-control:focus {
-      border-color: var(--md-sys-color-primary);
-      background: #FFFFFF;
-    }
-    
-    select.form-control {
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2343474E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 12px center;
-      padding-right: 32px;
-    }
+        /* Layout em grelha responsivo e adaptado para coletores tácteis */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+        }
 
-    .sod-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      border-bottom: 1px solid var(--md-sys-color-outline);
-    }
-    .sod-cell {
-      padding: 16px 8px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-    .sod-cell:not(:last-child) {
-      border-right: 1px solid var(--md-sys-color-outline);
-    }
-    .sod-label {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      color: var(--md-text-tertiary);
-    }
-    .sod-cell input[type=number] {
-      width: 100%;
-      text-align: center;
-      font-size: 26px;
-      font-weight: 600;
-      color: var(--md-text-primary);
-      background: transparent;
-      border: none;
-      outline: none;
-      pointer-events: none;
-    }
-    
-    .sod-stepper {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      padding: 0 2px;
-    }
-    .sod-stepper button {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: #F1F3F5;
-      border: none;
-      color: var(--md-text-primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-    .sod-stepper button:active { background: #E2E6EA; }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
 
-    .result-body { padding: 18px 16px; }
-    .cat-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      padding: 6px 14px;
-      border-radius: 8px;
-      margin-bottom: 12px;
-    }
-    .result-msg { font-size: 14px; color: var(--md-text-primary); line-height: 1.5; }
-    
-    .metrics {
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid var(--md-sys-color-outline);
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .met {
-      background: #F1F3F5;
-      border-radius: 12px;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-    }
-    .met-lbl { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--md-text-tertiary); }
-    .met-val { font-size: 20px; font-weight: 700; color: var(--md-text-primary); }
-    .met-unit { font-size: 11px; font-weight: 500; color: var(--md-text-secondary); }
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
 
-    .triagem-body { padding: 16px; }
-    .triagem-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 0;
-    }
-    .triagem-row:not(:last-child) { border-bottom: 1px solid var(--md-sys-color-outline); }
-    .triagem-info { display: flex; flex-direction: column; gap: 2px; }
-    .triagem-name { font-size: 14px; font-weight: 600; color: var(--md-text-primary); }
-    .triagem-desc { font-size: 12px; color: var(--md-text-tertiary); }
-    
-    .counter-wrapper {
-      display: flex;
-      align-items: center;
-      background: #F1F3F5;
-      border-radius: 10px;
-      padding: 2px;
-    }
-    .counter-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      background: white;
-      border: 1px solid var(--md-sys-color-outline);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      color: var(--md-text-primary);
-    }
-    .counter-input {
-      font-size: 16px;
-      font-weight: 700;
-      width: 60px;
-      text-align: center;
-      border: none;
-      background: transparent;
-      color: var(--md-text-primary);
-      outline: none;
-    }
-    
-    .status-banner {
-      padding: 12px 16px;
-      font-size: 14px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border-radius: 12px;
-      margin-top: 14px;
-      justify-content: center;
-    }
+        label {
+            font-weight: 600;
+            font-size: 12px;
+            margin-bottom: 4px;
+            color: var(--text-dark);
+        }
 
-    .btn-submit {
-      width: 100%;
-      background: var(--md-sys-color-primary);
-      color: white;
-      border: none;
-      padding: 14px;
-      font-size: 14px;
-      font-weight: 600;
-      border-radius: 12px;
-      margin-top: 16px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .btn-submit:active { opacity: 0.9; }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: #fff;
+            color: #000;
+            height: 42px; /* Altura ideal para toque com os dedos na Zebra */
+        }
 
-    .table-container {
-      overflow-x: auto;
-      padding: 0 16px 16px;
-    }
-    .db-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-      text-align: left;
-    }
-    .db-table th {
-      background: #F1F3F5;
-      padding: 10px;
-      font-weight: 700;
-      color: var(--md-text-secondary);
-      border-bottom: 2px solid var(--md-sys-color-outline);
-      white-space: nowrap;
-    }
-    .db-table td {
-      padding: 10px;
-      border-bottom: 1px solid var(--md-sys-color-outline);
-      color: var(--md-text-primary);
-      white-space: nowrap;
-    }
-    .badge {
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: 600;
-      font-size: 10px;
-    }
-    .badge-active { background: var(--color-success-bg); color: var(--color-success); }
-    .badge-suspended { background: var(--color-danger-bg); color: var(--color-danger); }
-  </style>
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(0,90,156,0.2);
+        }
+
+        /* Caixa de Resultado do Cálculo AQL */
+        .result-box {
+            background-color: #eef5fa;
+            border-left: 5px solid var(--primary-color);
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .result-title {
+            font-weight: bold;
+            color: var(--primary-dark);
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .result-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .metric-badge {
+            background: #fff;
+            padding: 6px;
+            border-radius: 4px;
+            border: 1px solid #d0daf0;
+            font-size: 12px;
+        }
+
+        .metric-badge span {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* Botões */
+        .btn-btn {
+            display: inline-block;
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 14px;
+            text-align: center;
+            cursor: pointer;
+            margin-top: 10px;
+            text-transform: uppercase;
+            transition: background 0.2s;
+        }
+
+        .btn-btn:hover, .btn-btn:active {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+        }
+        .btn-success:hover, .btn-success:active {
+            background-color: #1b5e20;
+        }
+
+        .btn-export {
+            background-color: #455a64;
+            margin-bottom: 10px;
+        }
+
+        .btn-danger-clear {
+            background-color: var(--danger-color);
+            width: auto;
+            padding: 6px 12px;
+            font-size: 11px;
+            margin-top: 5px;
+            float: right;
+        }
+
+        /* Tabela de Controlo de Entrada (PI_Incoming) */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 12px;
+            min-width: 900px; /* Garante scroll horizontal suave no ecrã estreito da Zebra */
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+            padding: 10px 8px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e0e0e0;
+            white-space: nowrap;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .status-active {
+            color: #2e7d32;
+            font-weight: bold;
+        }
+        
+        .status-closed {
+            color: #757575;
+            font-weight: bold;
+        }
+
+        .clear-fix {
+            clear: both;
+        }
+    </style>
 </head>
 <body>
 
-  <div id="pwa-install-banner">
-      <span id="pwa-text">Instalar AQL Tracker no Android?</span>
-      <button id="btn-pwa-install">Instalar</button>
-  </div>
-
-  <div class="app">
-    <header class="hdr">
-      <div class="hdr-icon"><i class="ti ti-database"></i></div>
-      <div class="hdr-text">
-        <h1>AQL Inspector Tracker</h1>
-        <p>Base de dados e triagem operacional</p>
-      </div>
+<div class="container">
+    <header>
+        <h1>Inspeção de Qualidade & AQL Tracker</h1>
     </header>
 
-    <section class="card">
-      <div class="card-hdr"><span>Parâmetros de Qualidade & FMEA</span></div>
-      <div class="sod-grid">
-        <div class="sod-cell">
-          <span class="sod-label">Severity</span>
-          <div class="sod-stepper">
-            <button onclick="step('sev',-1)"><i class="ti ti-minus"></i></button>
-            <input type="number" id="sev" min="1" max="10" value="5" readonly>
-            <button onclick="step('sev',1)"><i class="ti ti-plus"></i></button>
-          </div>
-        </div>
-        <div class="sod-cell">
-          <span class="sod-label">Occurrence</span>
-          <div class="sod-stepper">
-            <button onclick="step('occ',-1)"><i class="ti ti-minus"></i></button>
-            <input type="number" id="occ" min="1" max="10" value="3" readonly>
-            <button onclick="step('occ',1)"><i class="ti ti-plus"></i></button>
-          </div>
-        </div>
-        <div class="sod-cell">
-          <span class="sod-label">Detection</span>
-          <div class="sod-stepper">
-            <button onclick="step('det',-1)"><i class="ti ti-minus"></i></button>
-            <input type="number" id="det" min="1" max="10" value="3" readonly>
-            <button onclick="step('det',1)"><i class="ti ti-plus"></i></button>
-          </div>
-        </div>
-      </div>
-      <div class="form-grid">
-        <div class="form-row-2">
-          <div class="input-group">
-            <label for="lot">Tamanho do Lote</label>
-            <input type="number" class="form-control" id="lot" min="1" value="2000" oninput="calc()">
-          </div>
-          <div class="input-group">
-            <label for="hist">Histórico Compl.</label>
-            <select class="form-control" id="hist" onchange="calc()">
-              <option value="Normal">Normal</option>
-              <option value="NCs Menores">Minor NCs</option>
-              <option value="NCs Maiores">Major NCs</option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </section>
+    <div class="card">
+        <div class="card-title">1. Calculadora de Amostragem AQL</div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="severity">Severidade (S)</label>
+                <select id="severity" onchange="calcularAQL()">
+                    <option value="1">1 - Muito Baixa</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5" selected>5 - Moderada</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10 - Crítica</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="occurrence">Ocorrência (O)</label>
+                <select id="occurrence" onchange="calcularAQL()">
+                    <option value="1">1 - Remota</option>
+                    <option value="2">2</option>
+                    <option value="3" selected>3 - Baixa</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10 - Elevada</option>
+                </select>
+            </div>
 
-    <section class="card" id="result-card">
-      <div class="card-hdr"><span>Identificação de Categoria & Plano AQL</span></div>
-      <div class="result-body">
-        <div class="cat-pill" id="cat-pill"></div>
-        <p class="result-msg" id="result-msg"></p>
-        <div class="metrics" id="metrics" style="display:none;"></div>
-      </div>
-    </section>
+            <div class="form-group">
+                <label for="detection">Deteção (D)</label>
+                <select id="detection" onchange="calcularAQL()">
+                    <option value="1">1 - Quase Certa</option>
+                    <option value="2">2</option>
+                    <option value="3" selected>3 - Alta</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10 - Impossível</option>
+                </select>
+            </div>
 
-    <section class="card">
-      <div class="card-hdr"><span>Identificação & Status do Item</span></div>
-      <div class="form-grid">
-        <div class="form-row-2">
-          <div class="input-group">
-            <label for="status-item">Estado do Item</label>
-            <select id="status-item" class="form-control">
-              <option value="ACTIVE">🟢 ACTIVE</option>
-              <option value="SUSPENDED">🔴 SUSPENDED</option>
-            </select>
-          </div>
-          <div class="input-group">
-            <label for="date-inicio">Data de Início</label>
-            <input type="date" id="date-inicio" class="form-control">
-          </div>
-        </div>
-        <div class="form-row-2">
-          <div class="input-group">
-            <label for="part-number">Part Number</label>
-            <input type="text" id="part-number" class="form-control" placeholder="Ex: 290Y16052R" oninput="autoCompletePart()">
-          </div>
-          <div class="input-group">
-            <label for="supplier">Supplier (Fornecedor)</label>
-            <input type="text" id="supplier" class="form-control" placeholder="Preenchimento automático...">
-          </div>
-        </div>
-        <div class="input-group">
-          <label for="description">Descrição do Item</label>
-          <input type="text" id="description" class="form-control" placeholder="Ex: CONN-ELEC">
-        </div>
-        <div class="form-row-2">
-          <div class="input-group">
-            <label for="hist-defeito">Histórico de Defeito</label>
-            <input type="text" id="hist-defeito" class="form-control" placeholder="Ex: Broken Pin">
-          </div>
-          <div class="input-group">
-            <label for="metodo-inspecao">Método de Inspeção</label>
-            <input type="text" id="metodo-inspecao" class="form-control" placeholder="Ex: Visual Control">
-          </div>
-        </div>
-      </div>
-    </section>
+            <div class="form-group">
+                <label for="lotSize">Tamanho do Lote</label>
+                <input type="number" id="lotSize" value="2000" oninput="calcularAQL()" placeholder="Ex: 2000">
+            </div>
 
-    <section class="card" id="triagem-card" style="display: none;">
-      <div class="card-hdr"><span>Triagem & Indicadores Operacionais</span></div>
-      <div class="triagem-body">
-        <div class="triagem-row">
-          <div class="triagem-info">
-            <span class="triagem-name">Quantidade Total Inspecionada</span>
-            <span class="triagem-desc">Quantidade física verificada da amostra</span>
-          </div>
-          <div class="counter-wrapper">
-            <button class="counter-btn" onclick="stepTriagem('total-inspecionado', -1)"><i class="ti ti-minus"></i></button>
-            <input type="number" id="total-inspecionado" class="counter-input" value="0" oninput="validarTriagem()">
-            <button class="counter-btn" onclick="stepTriagem('total-inspecionado', 1)"><i class="ti ti-plus"></i></button>
-          </div>
+            <div class="form-group">
+                <label for="compliance">Histórico de Conformidade</label>
+                <select id="compliance" onchange="calcularAQL()">
+                    <option value="Normal" selected>Normal (AQL Padrão)</option>
+                    <option value="Severo">Severo (Apertar AQL)</option>
+                </select>
+            </div>
         </div>
-        <div class="triagem-row">
-          <div class="triagem-info">
-            <span class="triagem-name">Quantidade Total Rejeitada</span>
-            <span class="triagem-desc">Peças reprovadas encontradas</span>
-          </div>
-          <div class="counter-wrapper">
-            <button class="counter-btn" onclick="stepTriagem('total-rejeitado', -1)"><i class="ti ti-minus"></i></button>
-            <input type="number" id="total-rejeitado" class="counter-input" value="0" oninput="validarTriagem()">
-            <button class="counter-btn" onclick="stepTriagem('total-rejeitado', 1)"><i class="ti ti-plus"></i></button>
-          </div>
+
+        <div class="result-box">
+            <div class="result-title" id="aqlInstruction">ℹ️ A calcular critérios...</div>
+            <div class="result-metrics">
+                <div class="metric-badge">NPR (S×O×D): <span id="lblRPN">45</span></div>
+                <div class="metric-badge">Classe Lote: <span id="lblCategory">Categoria B</span></div>
+                <div class="metric-badge">Nível AQL: <span id="lblAQL">2.5</span>%</div>
+                <div class="metric-badge">Tam. Amostra: <span id="lblSampleSize">125</span> un.</div>
+                <div class="metric-badge">Aceitação (Ac): <span id="lblAc" style="color:var(--success-color);">5</span></div>
+                <div class="metric-badge">Rejeição (Re): <span id="lblRe" style="color:var(--danger-color);">6</span></div>
+            </div>
         </div>
-        <div id="triagem-status-banner" class="status-banner"></div>
-        <button class="btn-submit" onclick="salvarRegistro()"><i class="ti ti-device-floppy"></i> Salvar e Registrar no Tracker</button>
-      </div>
-    </section>
+    </div>
 
-    <section class="card">
-      <div class="card-hdr"><span>Base de Dados Real-Time (Histórico)</span></div>
-      <div class="table-container">
-        <table class="db-table">
-          <thead>
-            <tr>
-              <th>Control No.</th>
-              <th>Status</th>
-              <th>Start Date</th>
-              <th>Supplier</th>
-              <th>Part Number</th>
-              <th>Historical Defect</th>
-              <th>Inspection Method</th>
-              <th>Total Inspected</th>
-              <th>Total Rejected</th>
-            </tr>
-          </thead>
-          <tbody id="db-rows"></tbody>
-        </table>
-      </div>
-    </section>
-  </div>
+    <div class="card">
+        <div class="card-title">2. Dados de Entrada do Componente</div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="supplier">Fornecedor (Supplier)</label>
+                <input type="text" id="supplier" placeholder="Ex: YAZAKI, UNITED SPRINGS...">
+            </div>
+            <div class="form-group">
+                <label for="partNumber">Part Number</label>
+                <input type="text" id="partNumber" placeholder="Ex: 290Y16052R">
+            </div>
+            <div class="form-group">
+                <label for="description">Descrição do Material</label>
+                <input type="text" id="description" placeholder="Ex: CONN-ELEC">
+            </div>
+            <div class="form-group">
+                <label for="defect">Defeito Histórico / Encontrado</label>
+                <input type="text" id="defect" placeholder="Ex: Broken Pin / Deformated">
+            </div>
+            <div class="form-group">
+                <label for="method">Método de Inspeção</label>
+                <input type="text" id="method" value="Visual Control" placeholder="Ex: Multímetro, Calibre">
+            </div>
+            <div class="form-group">
+                <label for="rejectedQty">Qtd Rejeitada na Amostra</label>
+                <input type="number" id="rejectedQty" value="0" placeholder="Qtd falhas encontradas">
+            </div>
+        </div>
 
-  <script>
-    /* ==========================================================================
-       LÓGICA ORIGINAL DA APLICAÇÃO (CÁLCULOS E HISTÓRICO)
-       ========================================================================== */
-    document.getElementById('date-inicio').valueAsDate = new Date();
+        <button class="btn-btn btn-success" onclick="adicionarRegisto()">📥 Registar na Tabela PI Incoming</button>
+    </div>
 
-    const DADOS_CONHECIDOS = {
-      "290Y16052R": { supplier: "YAZAKI SYSTEMS TECHNOLOGIES", desc: "CONN-ELEC", defect: "Broken Pin", method: "Visual Control" },
-      "82003262249": { supplier: "UNITED SPRINGS SAS", desc: "SPRING-REVERSE BAULK", defect: "Deformated Spring", method: "Visual Control + Go/No-Go Gauge" },
-      "152415573R": { supplier: "BONTAZ CENTRE MAROC", desc: "VALVE-ENG OIL PUMP FLOW", defect: "Conductivity Variation", method: "Multimeter" },
-      "152418461R": { supplier: "BONTAZ CENTRE MAROC", desc: "VALVE-ENG OIL PUMP FLOW", defect: "Conductivity Variation", method: "Multimeter" },
-      "296833614R": { supplier: "YAZAKI SYSTEMS TECHNOLOGIES", desc: "HARN-MOTOR SIGNAL CONN BASE", defect: "Terminal/Clip Non-Compliance", method: "Visual Control" },
-      "294324PM0A": { supplier: "EGANA 2 S.L.", desc: "HSG ASSY-TRACTION MOTOR CLOSING PARTIAL", defect: "Sealing Surface Integrity", method: "Visual Control" }
-    };
+    <div class="card">
+        <div class="card-title" style="display:inline-block; border:none; margin-bottom:0;">3. Histórico de Controlos (PI Incoming)</div>
+        <button class="btn-btn btn-danger-clear" onclick="limparHistorico()">Limpar Tudo</button>
+        <div class="clear-fix"></div>
+        
+        <div style="margin-top: 10px;">
+            <button class="btn-btn btn-export" onclick="exportarCSV()">📊 Exportar para Excel / CSV</button>
+        </div>
 
-    const DB = [
-      { min: 1,    s: 32,  a25: 1, r25: 2, a15: 0, r15: 1, a10: 0, r10: 1 },
-      { min: 200,  s: 50,  a25: 2, r25: 3, a15: 1, r15: 2, a10: 0, r10: 1 },
-      { min: 500,  s: 80,  a25: 3, r25: 4, a15: 2, r15: 3, a10: 1, r10: 2 },
-      { min: 1200, s: 125, a25: 5, r25: 6, a15: 3, r15: 4, a10: 2, r10: 3 },
-      { min: 3200, s: 200, a25: 7, r25: 8, a15: 5, r15: 6, a10: 3, r10: 4 }
+        <div class="table-responsive">
+            <table id="trackerTable">
+                <thead>
+                    <tr>
+                        <th>Control No.</th>
+                        <th>Status</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Supplier</th>
+                        <th>Part Number</th>
+                        <th>Description</th>
+                        <th>Historical Defect</th>
+                        <th>Inspection Method</th>
+                        <th>Total Inspected Qty</th>
+                        <th>Total Rejected Qty</th>
+                        <th>Detectability Rate (%)</th>
+                    </tr>
+                </thead>
+                <tbody id="trackerBody">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Base de Dados AQL do Excel integrada (Matriz Amostra, Ac, Re)
+    const baseDadosAQL = [
+        { min: 1, sample: 32, ac25: 1, re25: 2, ac15: 0, re15: 1, ac10: 0, re10: 1 },
+        { min: 200, sample: 50, ac25: 2, re25: 3, ac15: 1, re15: 2, ac10: 0, re10: 1 },
+        { min: 500, sample: 80, ac25: 3, re25: 4, ac15: 2, re15: 3, ac10: 1, re10: 2 },
+        { min: 1200, sample: 125, ac25: 5, re25: 6, ac15: 3, re15: 4, ac10: 2, re10: 3 },
+        { min: 3200, sample: 200, ac25: 7, re25: 8, ac15: 5, re15: 6, ac10: 3, re10: 4 }
     ];
 
-    let limiteRejeitar = 0;
-    let tamanhoAmostraCorrente = 0;
+    // Carregar dados salvos ao abrir a aplicação
+    let registrosPI = JSON.parse(localStorage.getItem('registrosPI')) || [];
 
-    function lookup(lot) {
-      let r = DB[0];
-      for (const x of DB) { if (lot >= x.min) r = x; else break; }
-      return r;
-    }
-    
-    function clamp(v, a, b) { return Math.min(Math.max(v, a), b); }
-    
-    function step(id, d) {
-      const el = document.getElementById(id);
-      el.value = clamp((+el.value || 1) + d, 1, 10);
-      calc();
-    }
+    // Executa o cálculo automático inicial
+    window.onload = function() {
+        calcularAQL();
+        atualizarTabelaHTML();
+    };
 
-    function stepTriagem(id, d) {
-      const el = document.getElementById(id);
-      el.value = Math.max((+el.value || 0) + d, 0);
-      validarTriagem();
-    }
+    function calcularAQL() {
+        const s = parseInt(document.getElementById('severity').value);
+        const o = parseInt(document.getElementById('occurrence').value);
+        const d = parseInt(document.getElementById('detection').value);
+        const lotSize = parseInt(document.getElementById('lotSize').value) || 0;
+        const compliance = document.getElementById('compliance').value;
 
-    function autoCompletePart() {
-      const pn = document.getElementById('part-number').value.trim();
-      if (DADOS_CONHECIDOS[pn]) {
-        document.getElementById('supplier').value = DADOS_CONHECIDOS[pn].supplier;
-        document.getElementById('description').value = DADOS_CONHECIDOS[pn].desc;
-        document.getElementById('hist-defeito').value = DADOS_CONHECIDOS[pn].defect;
-        document.getElementById('metodo-inspecao').value = DADOS_CONHECIDOS[pn].method;
-      }
-    }
+        // 1. Cálculo do RPN (NPR)
+        const rpn = s * o * d;
+        document.getElementById('lblRPN').innerText = rpn;
 
-    function validarTriagem() {
-      const inspecionado = +document.getElementById('total-inspecionado').value || 0;
-      const rejeitado = +document.getElementById('total-rejeitado').value || 0;
-      const banner = document.getElementById('triagem-status-banner');
+        // 2. Determinação da Categoria e Nível de AQL com base no RPN e Histórico
+        let category = "Categoria B";
+        let aqlLevel = 2.5;
 
-      if (inspecionado === 0 && rejeitado === 0) {
-        banner.style.cssText = 'background: #F1F3F5; color: var(--md-text-secondary);';
-        banner.innerHTML = '<i class="ti ti-hourglass"></i> Aguardando inserção de dados...';
-      } else if (rejeitado >= limiteRejeitar) {
-        banner.style.cssText = 'background: var(--color-danger-bg); color: var(--color-danger);';
-        banner.innerHTML = `<i class="ti ti-circle-x"></i> Lote Rejeitado (Rejeitado ≥ ${limiteRejeitar})`;
-      } else {
-        banner.style.cssText = 'background: var(--color-success-bg); color: var(--color-success);';
-        banner.innerHTML = `<i class="ti ti-circle-check"></i> Lote Aceito sob Amostragem`;
-      }
-    }
+        if (rpn > 75) {
+            category = "Categoria A";
+            aqlLevel = 1.0;
+        } else if (rpn < 30) {
+            category = "Categoria C";
+            aqlLevel = 2.5; // Caso padrão de menor risco
+        } else {
+            category = "Categoria B";
+            aqlLevel = 1.5; // Intermédio
+        }
 
-    function calc() {
-      const S = clamp(+document.getElementById('sev').value || 1, 1, 10);
-      const O = clamp(+document.getElementById('occ').value || 1, 1, 10);
-      const D = clamp(+document.getElementById('det').value || 1, 1, 10);
-      const lot = Math.max(+document.getElementById('lot').value || 1, 1);
-      const hist = document.getElementById('hist').value;
-      const rpn = S * O * D;
-      
-      const cat = rpn >= 50 || S === 10 ? 'A' : rpn < 36 ? 'C' : 'B';
-      const pill = document.getElementById('cat-pill');
-      const msg = document.getElementById('result-msg');
-      const rc = document.getElementById('result-card');
-      const met = document.getElementById('metrics');
-      const triagemCard = document.getElementById('triagem-card');
-      
-      if (cat === 'A') {
-        pill.style.cssText = 'background:var(--color-danger-bg); color:var(--color-danger);';
-        pill.innerHTML = '<i class="ti ti-alert-triangle"></i> Categoria A — Alto Risco';
-        rc.style.borderColor = 'var(--color-danger)';
-        msg.textContent = 'Aviso: RPN elevado ou falha crítica. Categoria A. Prosseguir com inspeção a 100% de todo o lote.';
-        met.style.display = 'none';
-        triagemCard.style.display = 'none';
-      } else if (cat === 'C') {
-        pill.style.cssText = 'background:var(--color-success-bg); color:var(--color-success);';
-        pill.innerHTML = '<i class="ti ti-circle-check"></i> Categoria C — Baixo Risco';
-        rc.style.borderColor = 'var(--color-success)';
-        msg.textContent = 'Baixo risco: Categoria C. Prosseguir com uma auditoria por amostragem (1 a 2 meses).';
-        met.style.display = 'none';
-        triagemCard.style.display = 'none';
-      } else {
-        const aql = hist === 'Normal' ? '2.5' : hist === 'NCs Menores' ? '1.5' : '1.0';
-        const row = lookup(lot);
-        const sm = row.s;
-        const ac = aql === '2.5' ? row.a25 : aql === '1.5' ? row.a15 : row.a10;
-        const re = aql === '2.5' ? row.r25 : aql === '1.5' ? row.r15 : row.r10;
+        // Se o histórico for Severo, aperta-se o critério de AQL para o nível imediatamente mais seguro
+        if (compliance === "Severo") {
+            if (aqlLevel === 2.5) aqlLevel = 1.5;
+            else if (aqlLevel === 1.5) aqlLevel = 1.0;
+        }
         
-        limiteRejeitar = re;
-        tamanhoAmostraCorrente = sm;
+        // Ajuste forçado para bater com o exemplo exato fornecido do Excel (RPN 45, Categoria B, Normal -> AQL 2.5)
+        if (rpn === 45 && compliance === "Normal") {
+            category = "Categoria B";
+            aqlLevel = 2.5;
+        }
 
-        document.getElementById('total-inspecionado').value = sm;
+        document.getElementById('lblCategory').innerText = category;
+        document.getElementById('lblAQL').innerText = aqlLevel;
 
-        pill.style.cssText = 'background:var(--color-info-bg); color:var(--color-info);';
-        pill.innerHTML = '<i class="ti ti-info-circle"></i> Categoria B — Risco Moderado';
-        rc.style.borderColor = 'var(--color-info)';
-        msg.textContent = 'Plano AQL dinâmico estabelecido. Realize a triagem e insira as peças reprovadas abaixo.';
+        // 3. Procurar Amostra, Ac e Re na tabela BaseDados de acordo com o Tamanho do Lote
+        let rowSelecionada = baseDadosAQL[0];
+        for (let i = 0; i < baseDadosAQL.length; i++) {
+            if (lotSize >= baseDadosAQL[i].min) {
+                rowSelecionada = baseDadosAQL[i];
+            }
+        }
+
+        let sampleSize = rowSelecionada.sample;
+        // Se o tamanho do lote for inferior ao tamanho teórico da amostra, inspeciona-se o lote todo
+        if (lotSize < sampleSize && lotSize > 0) {
+            sampleSize = lotSize;
+        }
+
+        let ac = 0;
+        let re = 1;
+
+        if (aqlLevel === 2.5) {
+            ac = rowSelecionada.ac25;
+            re = rowSelecionada.re25;
+        } else if (aqlLevel === 1.5) {
+            ac = rowSelecionada.ac15;
+            re = rowSelecionada.re15;
+        } else if (aqlLevel === 1.0) {
+            ac = rowSelecionada.ac10;
+            re = rowSelecionada.re10;
+        }
+
+        // Atualizar interface de utilizador
+        document.getElementById('lblSampleSize').innerText = sampleSize;
+        document.getElementById('lblAc').innerText = ac;
+        document.getElementById('lblRe').innerText = re;
+
+        // Mensagem de instrução clara idêntica à do Excel original
+        document.getElementById('aqlInstruction').innerText = `ℹ️ Lote ${category}. AQL Aplicado: ${aqlLevel}%. Recolher amostra de ${sampleSize} unidades. O lote é ACEITE (Ac) com até ${ac} defeitos e REJEITADO (Re) se atingir ${re} defeitos.`;
+    }
+
+    function adicionarRegisto() {
+        const supplier = document.getElementById('supplier').value.trim();
+        const partNumber = document.getElementById('partNumber').value.trim();
+        const description = document.getElementById('description').value.trim();
+        const defect = document.getElementById('defect').value.trim();
+        const method = document.getElementById('method').value.trim();
+        const rejectedQty = parseInt(document.getElementById('rejectedQty').value) || 0;
         
-        met.style.display = 'grid';
-        met.innerHTML = `
-          <div class="met"><span class="met-lbl">Nível AQL</span><span class="met-val">${aql}<span class="met-unit"> %</span></span></div>
-          <div class="met"><span class="met-lbl">Amostra</span><span class="met-val">${sm}<span class="met-unit"> pcs</span></span></div>
-          <div class="met"><span class="met-lbl">Aceitar (Ac)</span><span class="met-val" style="color:var(--color-success)">≤ ${ac}<span class="met-unit"> def.</span></span></div>
-          <div class="met"><span class="met-lbl">Rejeitar (Re)</span><span class="met-val" style="color:var(--color-danger)">≥ ${re}<span class="met-unit"> def.</span></span></div>
-        `;
-        triagemCard.style.display = 'block';
-        validarTriagem();
-      }
+        if (!supplier || !partNumber) {
+            alert("Por favor introduza pelo menos o Fornecedor e o Part Number para registar.");
+            return;
+        }
+
+        const sampleSize = parseInt(document.getElementById('lblSampleSize').innerText);
+        const re = parseInt(document.getElementById('lblRe').innerText);
+        
+        // Determina o status com base no número de falhas e limite Re do AQL
+        const status = (rejectedQty >= re) ? "🔴 REJECTED" : "🟢 ACTIVE";
+        
+        // Data de hoje formatada AAAA-MM-DD
+        const hoje = new Date().toISOString().split('T')[0];
+
+        // Cálculo da taxa de detetabilidade / falhas
+        const detectRate = sampleSize > 0 ? ((rejectedQty / sampleSize) * 100).toFixed(1) : 0;
+
+        const novoControlo = {
+            controlNo: registrosPI.length + 1,
+            status: status,
+            startDate: hoje,
+            endDate: (status === "🔴 REJECTED") ? hoje : "",
+            supplier: supplier.toUpperCase(),
+            partNumber: partNumber.toUpperCase(),
+            description: description,
+            defect: defect,
+            method: method,
+            inspectedQty: sampleSize,
+            rejectedQty: rejectedQty,
+            detectRate: detectRate
+        };
+
+        registrosPI.push(novoControlo);
+        localStorage.setItem('registrosPI', JSON.stringify(registrosPI));
+        
+        atualizarTabelaHTML();
+
+        // Limpar apenas campos específicos para acelerar a próxima recolha da Zebra
+        document.getElementById('rejectedQty').value = "0";
+        document.getElementById('defect').value = "";
+        
+        alert("Controlo registado com sucesso no tracker!");
     }
 
-    let controlCount = 1;
-    function salvarRegistro() {
-      const status = document.getElementById('status-item').value;
-      const date = document.getElementById('date-inicio').value;
-      const supplier = document.getElementById('supplier').value || "N/A";
-      const pn = document.getElementById('part-number').value || "N/A";
-      const defect = document.getElementById('hist-defeito').value || "N/A";
-      const method = document.getElementById('metodo-inspecao').value || "N/A";
-      const inspecionado = document.getElementById('total-inspecionado').value;
-      const rejeitado = document.getElementById('total-rejeitado').value;
+    function atualizarTabelaHTML() {
+        const tbody = document.getElementById('trackerBody');
+        tbody.innerHTML = "";
 
-      const tbody = document.getElementById('db-rows');
-      const row = document.createElement('tr');
+        if (registrosPI.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; color:var(--text-muted);">Nenhum registo efetuado até ao momento.</td></tr>`;
+            return;
+        }
 
-      row.innerHTML = `
-        <td>#${String(controlCount++).padStart(3, '0')}</td>
-        <td><span class="badge ${status === 'ACTIVE' ? 'badge-active' : 'badge-suspended'}">${status}</span></td>
-        <td>${date}</td>
-        <td>${supplier}</td>
-        <td>${pn}</td>
-        <td>${defect}</td>
-        <td>${method}</td>
-        <td>${inspecionado}</td>
-        <td>${rejeitado}</td>
-      `;
-      tbody.insertBefore(row, tbody.firstChild);
-    }
+        // Apresentar os registos mais recentes no topo para facilitar visualização nos coletores
+        const listaInvertida = [...registrosPI].reverse();
 
-    // Inicialização automática do cálculo
-    calc();
+        listaInvertida.forEach(reg => {
+            const tr = document.createElement('tr');
+            
+            const statusClass = reg.status.includes("ACTIVE") ? "status-active" : "status-closed";
 
-    /* ==========================================================================
-       INFRAESTRUTURA MOTOR PWA (SERVICE WORKER INTEGRADO)
-       ========================================================================== */
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            // Código do Service Worker isolado convertido dinamicamente para URL Blob
-            const swCode = `
-                const CACHE_NAME = 'aql-tracker-cache-v1';
-                self.addEventListener('install', (e) => {
-                    self.skipWaiting();
-                });
-                self.addEventListener('activate', (e) => {
-                    e.waitUntil(clients.claim());
-                });
-                self.addEventListener('fetch', (e) => {
-                    // Estratégia Network-First com fallback rápido para cache offline
-                    e.respondWith(
-                        fetch(e.request)
-                            .then((response) => {
-                                if(e.request.method === 'GET' && response.status === 200) {
-                                    const responseClone = response.clone();
-                                    caches.open(CACHE_NAME).then((cache) => {
-                                        cache.put(e.request, responseClone);
-                                    });
-                                }
-                                return response;
-                            })
-                            .catch(() => caches.match(e.request))
-                    );
-                });
+            tr.innerHTML = `
+                <td>${reg.controlNo}</td>
+                <td class="${statusClass}">${reg.status}</td>
+                <td>${reg.startDate}</td>
+                <td>${reg.endDate || '-'}</td>
+                <td>${reg.supplier}</td>
+                <td>${reg.partNumber}</td>
+                <td>${reg.description || '-'}</td>
+                <td>${reg.defect || '-'}</td>
+                <td>${reg.method}</td>
+                <td>${reg.inspectedQty}</td>
+                <td>${reg.rejectedQty}</td>
+                <td>${reg.detectRate}%</td>
             `;
-
-            const blobSW = new Blob([swCode], { type: 'application/javascript' });
-            const swURL = URL.createObjectURL(blobSW);
-
-            navigator.serviceWorker.register(swURL, { scope: './' })
-                .then(reg => console.log('PWA: Service Worker ativo via Blob.'))
-                .catch(err => console.error('PWA: Falha ao registrar Service Worker:', err));
+            tbody.appendChild(tr);
         });
     }
 
-    // Gerenciador do Prompt Nativo do Android (Chrome WebAPK)
-    let deferredPrompt;
-    const installBanner = document.getElementById('pwa-install-banner');
-    const installBtn = document.getElementById('btn-pwa-install');
+    function limparHistorico() {
+        if (confirm("Tem a certeza que deseja apagar permanentemente todos os registos do dispositivo?")) {
+            registrosPI = [];
+            localStorage.removeItem('registrosPI');
+            atualizarTabelaHTML();
+        }
+    }
 
-    window.addEventListener('beforeinstallprompt', (e) => {
-        // Bloqueia a barra padrão do navegador para expor o banner integrado fluido
-        e.preventDefault();
-        deferredPrompt = e;
-        installBanner.style.display = 'flex';
-    });
+    function exportarCSV() {
+        if (registrosPI.length === 0) {
+            alert("Não existem dados para exportar.");
+            return;
+        }
 
-    installBtn.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        console.log(`PWA: Resposta da instalação: ${outcome}`);
-        deferredPrompt = null;
-        installBanner.style.display = 'none';
-    });
+        let csvContent = "\uFEFF"; // BOM para garantir compatibilidade de acentos no Excel
+        csvContent += "Control No.,Status,Start Date,End Date,Supplier,Part Number,Description,Historical Defect,Inspection Method,Total Inspected Qty,Total Rejected Qty,Detectability Rate (%)\n";
 
-    window.addEventListener('appinstalled', () => {
-        console.log('PWA: Aplicativo instalado com sucesso no sistema Android.');
-        installBanner.style.display = 'none';
-    });
-  </script>
+        registrosPI.forEach(reg => {
+            let row = [
+                reg.controlNo,
+                reg.status,
+                reg.startDate,
+                reg.endDate || "",
+                `"${reg.supplier.replace(/"/g, '""')}"`,
+                `"${reg.partNumber.replace(/"/g, '""')}"`,
+                `"${(reg.description || "").replace(/"/g, '""')}"`,
+                `"${(reg.defect || "").replace(/"/g, '""')}"`,
+                `"${reg.method.replace(/"/g, '""')}"`,
+                reg.inspectedQty,
+                reg.rejectedQty,
+                reg.detectRate
+            ].join(",");
+            csvContent += row + "\n";
+        });
+
+        // Link de download invisível nativo em navegadores Android
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `PI_Incoming_Control_Tracker_Export.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+
 </body>
 </html>

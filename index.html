@@ -7,6 +7,8 @@
   <meta name="description" content="Calculadora AQL de Inspeção por Amostragem & Tracker com Alta Capacidade" />
   <title>AQL Inspector & Tracker (Pro)</title>
 
+  <link rel="manifest" id="pwa-manifest" />
+
   <style>
     /* ─────────────────────────────────────────
         RESET & TOKENS (Light Mode)
@@ -146,7 +148,7 @@
     /* ESTILOS DO TRACKER */
     .btn-primary { width: 100%; margin-top: 16px; background: var(--accent2); color: white; padding: 16px; border: none; border-radius: var(--radius-sm); font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
     .btn-primary:active { background: #0369a1; }
-    
+     
     .table-responsive { margin-top: 20px; overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); background: #fff; }
     table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; white-space: nowrap; }
     th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); }
@@ -154,7 +156,7 @@
     td { color: var(--text); }
     .td-number { font-family: var(--font-body); font-weight: 500; }
     .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.76rem; font-weight: bold; transition: all 0.2s ease; }
-    
+     
     .btn-delete { background: none; border: none; color: var(--danger); font-size: 1.1rem; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; }
     .btn-delete:active { opacity: 0.5; }
     .btn-delete-sub { font-size: 0.9rem; padding: 2px; opacity: 0.7; }
@@ -165,7 +167,7 @@
     .tr-main:hover { background-color: #f8fafc; }
     .toggle-icon { display: inline-block; width: 12px; transition: transform 0.2s ease; font-size: 0.75rem; margin-right: 4px; color: var(--muted); }
     .tr-main.expanded .toggle-icon { transform: rotate(90deg); }
-    
+     
     .tr-sub { background-color: #f8fafc; display: none; }
     .tr-sub td { padding: 8px 14px; border-bottom: 1px dashed var(--border); color: var(--muted); font-size: 0.8rem; }
     .sub-badge { background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 600; }
@@ -210,7 +212,7 @@
 <body>
 
 <header>
-  <div class="version-badge">v4.0 (IndexedDB)</div>
+  <div class="version-badge">v4.1 (PWA Live)</div>
   <div class="logo-icon">🔬</div>
   <div class="header-text">
     <h1>AQL Inspector</h1>
@@ -341,6 +343,59 @@
 
 <script>
 // ==========================================
+// CONFIGURAÇÃO AUTOMÁTICA DO PWA (Single File)
+// ==========================================
+(function setupPWA() {
+  const iconUrl = "https://github.com/user-attachments/assets/78790071-93f2-4de7-8db4-dcb8cc28b45b";
+  
+  // 1. Injetar Manifesto Dinamicamente via Blob URL
+  const manifestData = {
+    "name": "AQL Inspector & Tracker Pro",
+    "short_name": "AQL Inspector",
+    "description": "Calculadora AQL de Inspeção por Amostragem & Tracker com Alta Capacidade",
+    "start_url": window.location.href,
+    "display": "standalone",
+    "background_color": "#f1f5f9",
+    "theme_color": "#ffffff",
+    "orientation": "portrait-primary",
+    "icons": [
+      { "src": iconUrl, "sizes": "512x512", "type": "image/png" },
+      { "src": iconUrl, "sizes": "192x192", "type": "image/png" }
+    ]
+  };
+  const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
+  document.getElementById('pwa-manifest').setAttribute('href', URL.createObjectURL(manifestBlob));
+
+  // 2. Criar e Registrar o Service Worker Dinamicamente
+  if ('serviceWorker' in navigator) {
+    const swCode = `
+      const CACHE_NAME = 'aql-tracker-single-cache-v5';
+      self.addEventListener('install', (e) => {
+        self.skipWaiting();
+      });
+      self.addEventListener('activate', (e) => {
+        e.waitUntil(self.clients.claim());
+      });
+      self.addEventListener('fetch', (e) => {
+        // Ignora requisições locais geradas dinamicamente e foca no tráfego de rede padrão
+        if (e.request.url.startsWith('blob:') || e.request.url.startsWith('chrome-extension:')) return;
+        e.respondWith(
+          fetch(e.request).catch(() => caches.match(e.request))
+        );
+      });
+    `;
+    const swBlob = new Blob([swCode], {type: 'application/javascript'});
+    const swUrl = URL.createObjectURL(swBlob);
+    
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register(swUrl, { scope: './' })
+        .then(reg => console.log('PWA: Ativado com Sucesso!'))
+        .catch(err => console.error('PWA: Erro de Ativação', err));
+    });
+  }
+})();
+
+// ==========================================
 // LÓGICA ORIGINAL AQL
 // ==========================================
 const DB = [
@@ -420,7 +475,7 @@ function calc() {
 }
 
 // ==========================================
-// NOVA LÓGICA: ARMAZENAMENTO ILIMITADO COM INDEXEDDB
+// ARMAZENAMENTO ILIMITADO COM INDEXEDDB
 // ==========================================
 const DB_NAME = "AQLTrackerDB";
 const DB_VERSION = 1;
@@ -432,22 +487,14 @@ let mainIndexToDelete = null;
 let subIndexToDelete = null;
 let expandedRows = new Set(); 
 
-// Inicializar base de dados IndexedDB
 function initIndexedDB() {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open(DB_NAME, DB_VERSION);
-
         request.onerror = (e) => reject("Erro ao abrir base de dados local: " + e.target.error);
-        
-        request.onsuccess = (e) => {
-            db = e.target.result;
-            resolve(db);
-        };
-
+        request.onsuccess = (e) => { db = e.target.result; resolve(db); };
         request.onupgradeneeded = (e) => {
             const database = e.target.result;
             if (!database.objectStoreNames.contains(STORE_NAME)) {
-                // Usamos o part number como chave única estrutural
                 database.createObjectStore(STORE_NAME, { keyPath: "part" });
             }
         };
@@ -459,7 +506,6 @@ function getAllRecordsFromDB() {
         const transaction = db.transaction([STORE_NAME], "readonly");
         const store = transaction.objectStore(STORE_NAME);
         const request = store.getAll();
-
         request.onsuccess = () => resolve(request.result);
         request.onerror = () => reject(request.error);
     });
@@ -470,7 +516,6 @@ function saveRecordToDB(record) {
         const transaction = db.transaction([STORE_NAME], "readwrite");
         const store = transaction.objectStore(STORE_NAME);
         const request = store.put(record);
-
         request.onsuccess = () => resolve();
         request.onerror = () => reject(request.error);
     });
@@ -481,42 +526,31 @@ function deleteRecordFromDB(partKey) {
         const transaction = db.transaction([STORE_NAME], "readwrite");
         const store = transaction.objectStore(STORE_NAME);
         const request = store.delete(partKey);
-
         request.onsuccess = () => resolve();
         request.onerror = () => reject(request.error);
     });
 }
 
-// Inicialização e carregamento assíncrono dos dados
 async function loadTrackerData() {
     try {
         await initIndexedDB();
         const savedRecords = await getAllRecordsFromDB();
-        
         if (savedRecords && savedRecords.length > 0) {
-            // Ordenar por atividade ou ordem padrão (mantendo os dados consistentes)
             trackerRecords = savedRecords;
         } else {
-            // Registos predefinidos padrão de segurança inicial
             const defaultRecords = [
                 { status: "🟢 ACTIVE", supplier: "YAZAKI SYSTEMS TECHNOLOGIES FRANCE", part: "290Y16052R", entries: [{ date: "2026-05-05", defect: "Broken Pin", insp: 120, rej: 0 }] },
                 { status: "🟢 ACTIVE", supplier: "UNITED SPRINGS SAS", part: "82003262249", entries: [{ date: "2026-05-05", defect: "Deformated Spring", insp: 480, rej: 0 }] },
                 { status: "🟢 ACTIVE", supplier: "BONTAZ CENTRE MAROC", part: "152415573R", entries: [{ date: "2026-05-05", defect: "Conductivity Variation", insp: 240, rej: 0 }] }
             ];
-            for (const rec of defaultRecords) {
-                await saveRecordToDB(rec);
-            }
+            for (const rec of defaultRecords) { await saveRecordToDB(rec); }
             trackerRecords = defaultRecords;
         }
-    } catch (err) {
-        console.error(err);
-    }
+    } catch (err) { console.error(err); }
 
-    // Recuperação de rascunhos rápidos de inputs mantém-se leve no localStorage
     document.getElementById('trackPart').value = localStorage.getItem('draftPart') || '';
     document.getElementById('trackSupplier').value = localStorage.getItem('draftSupplier') || '';
     document.getElementById('trackDefect').value = localStorage.getItem('draftDefect') || '';
-    
     updatePartsDropdown();
     renderTrackerTable();
 }
@@ -525,7 +559,6 @@ function updatePartsDropdown() {
     const datalist = document.getElementById('partsDatalist');
     if(!datalist) return;
     datalist.innerHTML = '';
-    
     const uniqueParts = [...new Set(trackerRecords.map(item => item.part))];
     uniqueParts.forEach(part => {
         if(part) {
@@ -539,9 +572,7 @@ function updatePartsDropdown() {
 document.getElementById('trackPart').addEventListener('input', function() {
     const currentPart = this.value.trim();
     localStorage.setItem('draftPart', currentPart);
-
     if(!currentPart) return;
-
     const match = trackerRecords.find(rec => rec.part.toUpperCase() === currentPart.toUpperCase());
     if (match) {
         document.getElementById('trackSupplier').value = match.supplier;
@@ -578,7 +609,6 @@ async function toggleStatus(index, event) {
 function toggleRow(index) {
     const rowEl = document.getElementById(`main-row-${index}`);
     const subRows = document.querySelectorAll(`.sub-row-${index}`);
-    
     if (expandedRows.has(index)) {
         expandedRows.delete(index);
         rowEl.classList.remove('expanded');
@@ -596,26 +626,20 @@ function renderTrackerTable() {
     tbody.innerHTML = '';
     
     trackerRecords.forEach((rec, index) => {
-        let totalInsp = 0;
-        let totalRej = 0;
+        let totalInsp = 0; let totalRej = 0;
         let uniqueDefects = new Set();
         let latestDate = rec.entries[0]?.date || '-';
 
         rec.entries.forEach(e => {
-            totalInsp += e.insp;
-            totalRej += e.rej;
+            totalInsp += e.insp; totalRej += e.rej;
             if(e.defect) uniqueDefects.add(e.defect);
             if(new Date(e.date) > new Date(latestDate)) latestDate = e.date;
         });
 
         const defectsArr = [...uniqueDefects];
         const defectsText = defectsArr.length > 0 ? defectsArr.join(', ') : '-';
-
         const isInactive = rec.status === "🔴 INACTIVE";
-        const badgeStyle = isInactive 
-            ? 'background: #fee2e2; color: #991b1b; cursor: pointer;' 
-            : 'background: #dcfce7; color: #166534; cursor: pointer;';
-
+        const badgeStyle = isInactive ? 'background: #fee2e2; color: #991b1b; cursor: pointer;' : 'background: #dcfce7; color: #166534; cursor: pointer;';
         const isExpanded = expandedRows.has(index);
 
         const trMain = document.createElement('tr');
@@ -624,14 +648,8 @@ function renderTrackerTable() {
         trMain.setAttribute('onclick', `toggleRow(${index})`);
         
         trMain.innerHTML = `
-            <td>
-                <button class="btn-delete" onclick="askDeleteMain(${index}, event)" title="Eliminar Part Number completo">🗑️</button>
-            </td>
-            <td>
-                <span class="status-badge" style="${badgeStyle}" onclick="toggleStatus(${index}, event)" title="Clique para alterar o estado">
-                    ${rec.status}
-                </span>
-            </td>
+            <td><button class="btn-delete" onclick="askDeleteMain(${index}, event)" title="Eliminar Part Number completo">🗑️</button></td>
+            <td><span class="status-badge" style="${badgeStyle}" onclick="toggleStatus(${index}, event)" title="Clique para alterar o estado">${rec.status}</span></td>
             <td>${latestDate}</td>
             <td><span class="toggle-icon">▶</span><strong>${rec.part}</strong></td>
             <td><strong>${rec.supplier}</strong></td>
@@ -647,9 +665,7 @@ function renderTrackerTable() {
             if (isExpanded) trSub.style.display = 'table-row';
 
             trSub.innerHTML = `
-                <td>
-                    <button class="btn-delete btn-delete-sub" onclick="askDeleteSub(${index}, ${subIndex}, event)" title="Eliminar apenas esta inspeção">🗑️</button>
-                </td>
+                <td><button class="btn-delete btn-delete-sub" onclick="askDeleteSub(${index}, ${subIndex}, event)" title="Eliminar apenas esta inspeção">🗑️</button></td>
                 <td style="text-align: right;"><span class="sub-badge">#${rec.entries.length - subIndex}</span></td>
                 <td>${entry.date}</td>
                 <td style="color: var(--muted); font-style: italic;">Sub-registo</td>
@@ -680,32 +696,18 @@ async function addTrackerRecord() {
     const parsedRej = parseInt(rej) || 0;
     const finalDate = dateStr || new Date().toISOString().split('T')[0];
 
-    const newSubEntry = {
-        date: finalDate,
-        defect: defect,
-        insp: parsedInsp,
-        rej: parsedRej
-    };
-
+    const newSubEntry = { date: finalDate, defect: defect, insp: parsedInsp, rej: parsedRej };
     const existingIndex = trackerRecords.findIndex(rec => rec.part.toUpperCase() === part.toUpperCase());
 
     if (existingIndex !== -1) {
         trackerRecords[existingIndex].entries.unshift(newSubEntry);
         trackerRecords[existingIndex].supplier = supplier;
-        
         const updatedRecord = trackerRecords.splice(existingIndex, 1)[0];
         trackerRecords.unshift(updatedRecord);
-        
         await saveRecordToDB(updatedRecord);
-        expandedRows.clear();
-        expandedRows.add(0);
+        expandedRows.clear(); expandedRows.add(0);
     } else {
-        const newRecord = {
-            status: "🟢 ACTIVE",
-            supplier: supplier,
-            part: part,
-            entries: [newSubEntry]
-        };
+        const newRecord = { status: "🟢 ACTIVE", supplier: supplier, part: part, entries: [newSubEntry] };
         trackerRecords.unshift(newRecord);
         await saveRecordToDB(newRecord);
         expandedRows.clear();
@@ -725,20 +727,14 @@ async function addTrackerRecord() {
 }
 
 function askDeleteMain(index, event) {
-    event.stopPropagation(); 
-    mainIndexToDelete = index;
-    subIndexToDelete = null;
-    
+    event.stopPropagation(); mainIndexToDelete = index; subIndexToDelete = null;
     document.getElementById('deleteModalTitle').textContent = 'Eliminar Part Number?';
     document.getElementById('deleteModalText').textContent = `Tem a certeza que deseja remover o Part Number "${trackerRecords[index].part}" e TODO o seu histórico de sub-registos da base de dados local?`;
     document.getElementById('deleteModal').style.display = 'flex';
 }
 
 function askDeleteSub(mainIndex, subIndex, event) {
-    event.stopPropagation();
-    mainIndexToDelete = mainIndex;
-    subIndexToDelete = subIndex;
-    
+    event.stopPropagation(); mainIndexToDelete = mainIndex; subIndexToDelete = subIndex;
     const entry = trackerRecords[mainIndex].entries[subIndex];
     document.getElementById('deleteModalTitle').textContent = 'Eliminar Sub-registo?';
     document.getElementById('deleteModalText').textContent = `Deseja remover apenas esta inspeção específica de data ${entry.date} (Insp: ${entry.insp} | Rej: ${entry.rej})?`;
@@ -747,17 +743,40 @@ function askDeleteSub(mainIndex, subIndex, event) {
 
 function closeDeleteModal() {
     document.getElementById('deleteModal').style.display = 'none';
-    mainIndexToDelete = null;
-    subIndexToDelete = null;
+    mainIndexToDelete = null; subIndexToDelete = null;
 }
 
 async function executeDeleteRecord() {
     if (mainIndexToDelete !== null) {
         const recordTarget = trackerRecords[mainIndexToDelete];
-        
         if (subIndexToDelete === null) {
-            // Apagar bloco completo da IndexedDB
             trackerRecords.splice(mainIndexToDelete, 1);
             expandedRows.delete(mainIndexToDelete);
             await deleteRecordFromDB(recordTarget.part);
+        } else {
+            recordTarget.entries.splice(subIndexToDelete, 1);
+            if (recordTarget.entries.length === 0) {
+                trackerRecords.splice(mainIndexToDelete, 1);
+                expandedRows.delete(mainIndexToDelete);
+                await deleteRecordFromDB(recordTarget.part);
+            } else {
+                await saveRecordToDB(recordTarget);
+            }
         }
+        updatePartsDropdown();
+        renderTrackerTable();
+        closeDeleteModal();
+    }
+}
+
+// Inicialização Global
+window.addEventListener('DOMContentLoaded', () => {
+  renderDots('sev', stepperState.sev);
+  renderDots('occ', stepperState.occ);
+  renderDots('det', stepperState.det);
+  calc();
+  loadTrackerData();
+});
+</script>
+</body>
+</html>

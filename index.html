@@ -1,1 +1,596 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="description" content="Calculadora AQL de Inspeção por Amostragem & Tracker" />
+  <title>AQL Inspector & Tracker</title>
 
+  <style>
+    /* ─────────────────────────────────────────
+        RESET & TOKENS (Light Mode)
+    ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
+
+    :root {
+      --bg:        #ffffff;
+      --surface:   #f8fafc;
+      --card:      #ffffff;
+      --border:    #e2e8f0;
+      --accent:    #059669;
+      --accent2:   #0284c7;
+      --warn:      #d97706;
+      --danger:    #dc2626;
+      --text:      #1e293b;
+      --muted:     #64748b;
+      --radius:    14px;
+      --radius-sm: 8px;
+      --shadow:    0 4px 12px rgba(0,0,0,.08);
+      --font-head: 'DM Sans', sans-serif;
+      --font-body: 'DM Mono', monospace;
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+    html { height: 100%; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      min-height: 100%;
+      background: #f1f5f9;
+      color: var(--text);
+      font-family: var(--font-head);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 0 60px;
+      user-select: none;
+    }
+
+    header {
+      width: 100%;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 28px 32px 22px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,.1);
+    }
+
+    .header-text h1 { font-size: 1.35rem; font-weight: 700; }
+    .header-text p { font-size: .75rem; color: var(--muted); font-family: var(--font-body); }
+
+    main {
+      width: 100%;
+      max-width: 680px;
+      padding: 32px 20px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .grid-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    @media (max-width: 600px) {
+        .grid-container { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-title { font-size: .7rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+    .card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .fields { display: grid; gap: 16px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    label { font-size: .8rem; font-weight: 500; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+
+    .stepper { display: flex; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; height: 56px; }
+    .step-btn { width: 60px; height: 100%; background: transparent; border: none; color: var(--muted); font-size: 1.5rem; cursor: pointer; transition: background .15s; }
+    .step-btn:active { background: #e2e8f0; }
+    .step-val { flex: 1; text-align: center; font-family: var(--font-body); font-size: 1.25rem; color: var(--accent); }
+    .step-dots { display: flex; gap: 3px; margin-top: 6px; }
+    .step-dot { height: 4px; flex: 1; border-radius: 2px; background: var(--border); }
+    .step-dot.on { background: var(--accent); }
+
+    input[type="number"], input[type="text"], input[type="date"], select { width: 100%; background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 14px; font-size: 1rem; color: var(--text); }
+
+    .result-card { border-radius: var(--radius); padding: 24px; transition: background .4s, border-color .4s; }
+    .result-card.cat-a { background: #fef2f2; border: 1px solid #fecaca; }
+    .result-card.cat-b { background: #fffbeb; border: 1px solid #fde68a; } 
+    .result-card.cat-c { background: #f0fdf9; border: 1px solid #a7f3d0; } 
+
+    .result-label { font-size: .68rem; font-weight: 600; text-transform: uppercase; margin-bottom: 12px; }
+    .cat-a .result-label { color: var(--danger); }
+    .cat-b .result-label { color: var(--warn); }
+    .cat-c .result-label { color: var(--accent); }
+
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .metric { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; text-align: center; }
+    .metric-val { font-family: var(--font-body); font-size: 1.6rem; color: var(--accent); }
+    .metric-label { font-size: .68rem; color: var(--muted); text-transform: uppercase; }
+
+    /* ESTILOS DO TRACKER */
+    .btn-primary { width: 100%; margin-top: 16px; background: var(--accent2); color: white; padding: 16px; border: none; border-radius: var(--radius-sm); font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .btn-primary:active { background: #0369a1; }
+    
+    .table-responsive { margin-top: 20px; overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); background: #fff; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; white-space: nowrap; }
+    th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+    th { background: var(--surface); color: var(--muted); font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
+    td { color: var(--text); }
+    .td-number { font-family: var(--font-body); font-weight: 500; }
+    .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; transition: all 0.2s ease; }
+    
+    .btn-delete { background: none; border: none; color: var(--danger); font-size: 1.1rem; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; }
+    .btn-delete:active { opacity: 0.5; }
+
+    /* MODAL DE CONFIRMAÇÃO */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 20px;
+    }
+    .modal-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15);
+      text-align: center;
+      animation: modalFadeIn 0.2s ease-out;
+    }
+    @keyframes modalFadeIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal-title { font-size: 1.15rem; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+    .modal-text { font-size: 0.9rem; color: var(--muted); margin-bottom: 24px; line-height: 1.4; }
+    .modal-buttons { display: flex; gap: 12px; }
+    .btn-modal { flex: 1; padding: 16px; border-radius: var(--radius-sm); font-size: 0.95rem; font-weight: 600; cursor: pointer; border: none; }
+    .btn-modal-cancel { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-modal-cancel:active { background: #e2e8f0; }
+    .btn-modal-confirm { background: var(--danger); color: white; }
+    .btn-modal-confirm:active { background: #b91c1c; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-icon">🔬</div>
+  <div class="header-text">
+    <h1>AQL Inspector</h1>
+    <p>Calculadora de Inspeção & Tracker</p>
+  </div>
+</header>
+
+<main>
+  <div class="grid-container">
+    <div class="card">
+      <div class="card-title">Parâmetros de Risco (FMEA)</div>
+      <div class="fields">
+        <div class="field">
+          <label>Severidade (S)</label>
+          <div class="stepper"><button class="step-btn" onclick="step('sev',-1)">−</button><span class="step-val" id="sevVal">5</span><button class="step-btn" onclick="step('sev',+1)">+</button></div>
+          <div class="step-dots" id="sevDots"></div>
+        </div>
+        <div class="field">
+          <label>Ocorrência (O)</label>
+          <div class="stepper"><button class="step-btn" onclick="step('occ',-1)">−</button><span class="step-val" id="occVal">3</span><button class="step-btn" onclick="step('occ',+1)">+</button></div>
+          <div class="step-dots" id="occDots"></div>
+        </div>
+        <div class="field">
+          <label>Detecção (D)</label>
+          <div class="stepper"><button class="step-btn" onclick="step('det',-1)">−</button><span class="step-val" id="detVal">3</span><button class="step-btn" onclick="step('det',+1)">+</button></div>
+          <div class="step-dots" id="detDots"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Parâmetros do Lote</div>
+      <div class="fields">
+        <div class="field">
+          <label>Tamanho do Lote</label>
+          <input type="number" id="lotSize" value="2000" oninput="calc()">
+        </div>
+        <div class="field">
+          <label>Histórico de Conformidade</label>
+          <select id="history" onchange="calc()">
+            <option value="Normal">Normal — AQL 2.5</option>
+            <option value="NCs Menores">NCs Menores — AQL 1.5</option>
+            <option value="NCs Maiores">NCs Maiores — AQL 1.0</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="result-card cat-b" id="resultCard">
+    <div class="result-label" id="resultLabel">Resultado</div>
+    <div class="result-message" id="resultMsg">—</div>
+  </div>
+
+  <div class="metrics" id="metricsSection">
+    <div class="metric"><div class="metric-val" id="mAQL">2.5</div><div class="metric-label">AQL</div></div>
+    <div class="metric"><div class="metric-val" id="mSample">125</div><div class="metric-label">Amostra (n)</div></div>
+    <div class="metric"><div class="metric-val" id="mAc">5</div><div class="metric-label">Aceitar (Ac)</div></div>
+  </div>
+
+  <div class="card" style="margin-top: 10px;">
+    <div class="card-title">Incoming Control Tracker</div>
+    
+    <div class="grid-container">
+        <div class="fields">
+            <div class="field">
+                <label>Part Number</label>
+                <input type="text" id="trackPart" list="partsDatalist" placeholder="Ex: 290Y16052R">
+                <datalist id="partsDatalist"></datalist>
+            </div>
+            <div class="field">
+                <label>Fornecedor</label>
+                <input type="text" id="trackSupplier" placeholder="Ex: YAZAKI SYSTEMS...">
+            </div>
+            <div class="field">
+                <label>Defeito Histórico (Opcional)</label>
+                <input type="text" id="trackDefect" placeholder="Ex: Broken Pin">
+            </div>
+        </div>
+        <div class="fields">
+            <div class="field">
+                <label>Qtd. Total Inspecionada</label>
+                <input type="number" id="trackInspected" placeholder="0">
+            </div>
+            <div class="field">
+                <label>Qtd. Total Rejeitada</label>
+                <input type="number" id="trackRejected" placeholder="0">
+            </div>
+            <div class="field">
+                <label>Data</label>
+                <input type="date" id="trackDate">
+            </div>
+        </div>
+    </div>
+    
+    <button class="btn-primary" onclick="addTrackerRecord()">Registrar Controle</button>
+
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Ação</th>
+                    <th>Status</th>
+                    <th>Data</th>
+                    <th>Part Number</th>
+                    <th>Fornecedor</th>
+                    <th>Defeito Histórico</th>
+                    <th>Qtd Insp.</th>
+                    <th>Qtd Rej.</th>
+                </tr>
+            </thead>
+            <tbody id="trackerBody"></tbody>
+        </table>
+    </div>
+  </div>
+</main>
+
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
+    <div class="modal-title">Eliminar Registo?</div>
+    <div class="modal-text">Tem a certeza que deseja remover este registo do histórico? Esta ação não pode ser desfeita.</div>
+    <div class="modal-buttons">
+      <button class="btn-modal btn-modal-cancel" onclick="closeDeleteModal()">Cancelar</button>
+      <button class="btn-modal btn-modal-confirm" onclick="executeDeleteRecord()">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==========================================
+// LÓGICA ORIGINAL AQL
+// ==========================================
+const DB = [
+  [1,       32,  1, 2, 0, 1, 0, 1],
+  [200,     50,  2, 3, 1, 2, 0, 1],
+  [500,     80,  3, 4, 2, 3, 1, 2],
+  [1200,    125, 5, 6, 3, 4, 2, 3],
+  [3200,    200, 7, 8, 5, 6, 3, 4],
+  [10001,   315, 10, 11, 7, 8, 5, 6]
+];
+
+function vlookup(lotSize) {
+  let row = DB[0];
+  for (const r of DB) { if (lotSize >= r[0]) row = r; else break; }
+  return row;
+}
+
+function getCategory(s, o, d) {
+  const rpn = s * o * d;
+  if (rpn >= 50 || s === 10) return 'A';
+  if (rpn < 36) return 'C';
+  return 'B';
+}
+
+const stepperState = { sev: 5, occ: 3, det: 3 };
+
+function step(id, delta) {
+  stepperState[id] = Math.min(10, Math.max(1, stepperState[id] + delta));
+  document.getElementById(id + 'Val').textContent = stepperState[id];
+  renderDots(id, stepperState[id]);
+  calc();
+}
+
+function renderDots(id, val) {
+  const container = document.getElementById(id + 'Dots');
+  if(!container) return;
+  container.innerHTML = '';
+  for (let i = 1; i <= 10; i++) {
+    const d = document.createElement('span');
+    d.className = 'step-dot' + (i <= val ? ' on' : '');
+    container.appendChild(d);
+  }
+}
+
+function calc() {
+  const { sev: s, occ: o, det: d } = stepperState;
+  const lotSize = parseInt(document.getElementById('lotSize').value) || 0;
+  const history = document.getElementById('history').value;
+  const cat = getCategory(s, o, d);
+  const aql = history === 'Normal' ? '2.5' : (history === 'NCs Menores' ? '1.5' : '1.0');
+  const row = vlookup(lotSize);
+  
+  let sample = 0, ac = 0, re = 0;
+  if (cat !== 'A') {
+    sample = row[1];
+    const idx = aql === '2.5' ? 2 : (aql === '1.5' ? 4 : 6);
+    ac = row[idx]; re = row[idx + 1];
+  }
+
+  const card = document.getElementById('resultCard');
+  if (cat === 'A') {
+    card.className = 'result-card cat-a';
+    document.getElementById('resultLabel').textContent = 'Categoria A — Inspeção 100%';
+    document.getElementById('resultMsg').textContent = '⚠️ Categoria A: Proceder com inspeção 100% de todo o lote.';
+  } else if (cat === 'C') {
+    card.className = 'result-card cat-c';
+    document.getElementById('resultLabel').textContent = 'Categoria C — Auditoria Periódica';
+    document.getElementById('resultMsg').textContent = '✅ Categoria C: Proceder com auditoria por amostragem.';
+  } else {
+    card.className = 'result-card cat-b';
+    document.getElementById('resultLabel').textContent = 'Categoria B — Amostragem AQL';
+    document.getElementById('resultMsg').textContent = `ℹ️ Categoria B (AQL ${aql}). Amostra: ${sample} peças. Aceitar (Ac) com até ${ac} defeitos, rejeitar (Re) com ${re} ou mais.`;
+  }
+  document.getElementById('mAQL').textContent = cat !== 'A' ? aql : '—';
+  document.getElementById('mSample').textContent = cat !== 'A' ? sample : '—';
+  document.getElementById('mAc').textContent = cat !== 'A' ? ac : '—';
+}
+
+// ==========================================
+// LÓGICA: INCOMING CONTROL TRACKER (V2)
+// ==========================================
+const defaultRecords = [
+    { status: "🟢 ACTIVE", date: "2026-05-05", supplier: "YAZAKI SYSTEMS TECHNOLOGIES FRANCE", part: "290Y16052R", defect: "Broken Pin", insp: 120, rej: 0 },
+    { status: "🟢 ACTIVE", date: "2026-05-05", supplier: "UNITED SPRINGS SAS", part: "82003262249", defect: "Deformated Spring", insp: 480, rej: 0 },
+    { status: "🟢 ACTIVE", date: "2026-05-05", supplier: "BONTAZ CENTRE MAROC", part: "152415573R", defect: "Conductivity Variation", insp: 240, rej: 0 }
+];
+
+let trackerRecords = [];
+let indexToUpdate = null;
+
+function loadTrackerData() {
+    const savedRecords = localStorage.getItem('aqlTrackerRecords_v2');
+    if (savedRecords) {
+        trackerRecords = JSON.parse(savedRecords);
+    } else {
+        trackerRecords = defaultRecords;
+        saveTrackerData();
+    }
+
+    document.getElementById('trackPart').value = localStorage.getItem('draftPart') || '';
+    document.getElementById('trackSupplier').value = localStorage.getItem('draftSupplier') || '';
+    document.getElementById('trackDefect').value = localStorage.getItem('draftDefect') || '';
+    
+    updatePartsDropdown();
+}
+
+function saveTrackerData() {
+    localStorage.setItem('aqlTrackerRecords_v2', JSON.stringify(trackerRecords));
+}
+
+function updatePartsDropdown() {
+    const datalist = document.getElementById('partsDatalist');
+    if(!datalist) return;
+    datalist.innerHTML = '';
+    
+    const uniqueParts = [...new Set(trackerRecords.map(item => item.part))];
+    uniqueParts.forEach(part => {
+        if(part) {
+            const option = document.createElement('option');
+            option.value = part;
+            datalist.appendChild(option);
+        }
+    });
+}
+
+document.getElementById('trackPart').addEventListener('input', function() {
+    const currentPart = this.value.trim();
+    localStorage.setItem('draftPart', currentPart);
+
+    if(!currentPart) return;
+
+    const match = trackerRecords.find(rec => rec.part.toUpperCase() === currentPart.toUpperCase());
+    if (match) {
+        document.getElementById('trackSupplier').value = match.supplier;
+        document.getElementById('trackDefect').value = match.defect || '';
+        
+        localStorage.setItem('draftSupplier', match.supplier);
+        localStorage.setItem('draftDefect', match.defect || '');
+    }
+});
+
+['trackSupplier', 'trackDefect'].forEach(id => {
+    document.getElementById(id).addEventListener('input', function() {
+        localStorage.setItem(id.replace('track', 'draft'), this.value.trim());
+    });
+});
+
+function toggleStatus(index) {
+    if (trackerRecords[index]) {
+        if (trackerRecords[index].status === "🟢 ACTIVE") {
+            trackerRecords[index].status = "🔴 INACTIVE";
+        } else {
+            trackerRecords[index].status = "🟢 ACTIVE";
+            trackerRecords[index].date = new Date().toISOString().split('T')[0];
+        }
+        saveTrackerData();
+        renderTrackerTable();
+    }
+}
+
+function renderTrackerTable() {
+    const tbody = document.getElementById('trackerBody');
+    if(!tbody) return;
+    tbody.innerHTML = '';
+    
+    trackerRecords.forEach((rec, index) => {
+        const isInactive = rec.status === "🔴 INACTIVE";
+        const badgeStyle = isInactive 
+            ? 'background: #fee2e2; color: #991b1b; cursor: pointer;' 
+            : 'background: #dcfce7; color: #166534; cursor: pointer;';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>
+                <button class="btn-delete" onclick="askDeleteRecord(${index})" title="Eliminar Registo">🗑️</button>
+            </td>
+            <td>
+                <span class="status-badge" style="${badgeStyle}" onclick="toggleStatus(${index})" title="Clique para alterar o estado">
+                    ${rec.status}
+                </span>
+            </td>
+            <td>${rec.date}</td>
+            <td>${rec.part}</td>
+            <td><strong>${rec.supplier}</strong></td>
+            <td>${rec.defect || '-'}</td>
+            <td class="td-number">${rec.insp}</td>
+            <td class="td-number" style="color: ${rec.rej > 0 ? 'var(--danger)' : 'inherit'}">${rec.rej}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function addTrackerRecord() {
+    const supplier = document.getElementById('trackSupplier').value.trim();
+    const part = document.getElementById('trackPart').value.trim();
+    const defect = document.getElementById('trackDefect').value.trim();
+    const insp = document.getElementById('trackInspected').value;
+    const rej = document.getElementById('trackRejected').value;
+    const dateStr = document.getElementById('trackDate').value;
+
+    if (!supplier || !part || !insp) {
+        alert('Por favor, preencha pelo menos o Part Number, Fornecedor e Quantidade Inspecionada.');
+        return;
+    }
+
+    const parsedInsp = parseInt(insp) || 0;
+    const parsedRej = parseInt(rej) || 0;
+    const finalDate = dateStr || new Date().toISOString().split('T')[0];
+
+    // Lógica CUMULATIVA: Procura se o Part Number já existe na tabela
+    const existingIndex = trackerRecords.findIndex(rec => rec.part.toUpperCase() === part.toUpperCase());
+
+    if (existingIndex !== -1) {
+        // Se já existe, acumula os valores e atualiza metadados
+        trackerRecords[existingIndex].insp += parsedInsp;
+        trackerRecords[existingIndex].rej += parsedRej;
+        trackerRecords[existingIndex].date = finalDate;
+        if (defect) trackerRecords[existingIndex].defect = defect; // Atualiza o defeito se um novo for digitado
+        
+        // Coloca o registo atualizado no topo da tabela para visibilidade
+        const updatedRecord = trackerRecords.splice(existingIndex, 1)[0];
+        trackerRecords.unshift(updatedRecord);
+    } else {
+        // Se for um Part Number novo, adiciona normalmente ao início
+        trackerRecords.unshift({
+            status: "🟢 ACTIVE",
+            date: finalDate,
+            supplier: supplier,
+            part: part,
+            defect: defect,
+            insp: parsedInsp,
+            rej: parsedRej
+        });
+    }
+
+    saveTrackerData();
+    updatePartsDropdown();
+    renderTrackerTable();
+
+    // Limpar campos de entrada e rascunhos temporários
+    document.getElementById('trackInspected').value = '';
+    document.getElementById('trackRejected').value = '';
+    document.getElementById('trackPart').value = '';
+    document.getElementById('trackSupplier').value = '';
+    document.getElementById('trackDefect').value = '';
+    
+    ['draftPart', 'draftSupplier', 'draftDefect'].forEach(key => localStorage.removeItem(key));
+    
+    document.getElementById('trackerBody').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function askDeleteRecord(index) {
+    indexToUpdate = index;
+    document.getElementById('deleteModal').style.display = 'flex';
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').style.display = 'none';
+    indexToUpdate = null;
+}
+
+function executeDeleteRecord() {
+    if (indexToUpdate !== null) {
+        trackerRecords.splice(indexToUpdate, 1);
+        saveTrackerData();
+        updatePartsDropdown();
+        renderTrackerTable();
+    }
+    closeDeleteModal();
+}
+
+// Inicialização segura da página
+document.getElementById('trackDate').valueAsDate = new Date();
+renderDots('sev', 5); renderDots('occ', 3); renderDots('det', 3);
+calc();
+loadTrackerData();
+renderTrackerTable();
+</script>
+</body>
+</html>

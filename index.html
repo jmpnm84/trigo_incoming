@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#ffffff" />
-  <meta name="description" content="Calculadora AQL de Inspeção por Amostragem & Tracker" />
-  <title>AQL Inspector & Tracker</title>
+  <meta name="description" content="Calculadora AQL de Inspeção por Amostragem & Tracker com Alta Capacidade" />
+  <title>AQL Inspector & Tracker (Pro)</title>
 
   <style>
     /* ─────────────────────────────────────────
@@ -210,11 +210,11 @@
 <body>
 
 <header>
-  <div class="version-badge">v1.1</div>
+  <div class="version-badge">v4.0 (IndexedDB)</div>
   <div class="logo-icon">🔬</div>
   <div class="header-text">
     <h1>AQL Inspector</h1>
-    <p>Calculadora de Inspeção & Tracker</p>
+    <p>Calculadora de Inspeção & Tracker de Alta Capacidade</p>
   </div>
 </header>
 
@@ -420,71 +420,105 @@ function calc() {
 }
 
 // ==========================================
-// LÓGICA: INCOMING CONTROL TRACKER (V3.1 - Sub-deletes)
+// NOVA LÓGICA: ARMAZENAMENTO ILIMITADO COM INDEXEDDB
 // ==========================================
-const defaultRecords = [
-    { 
-      status: "🟢 ACTIVE", 
-      supplier: "YAZAKI SYSTEMS TECHNOLOGIES FRANCE", 
-      part: "290Y16052R", 
-      entries: [
-        { date: "2026-05-05", defect: "Broken Pin", insp: 120, rej: 0 }
-      ]
-    },
-    { 
-      status: "🟢 ACTIVE", 
-      supplier: "UNITED SPRINGS SAS", 
-      part: "82003262249", 
-      entries: [
-        { date: "2026-05-05", defect: "Deformated Spring", insp: 480, rej: 0 }
-      ]
-    },
-    { 
-      status: "🟢 ACTIVE", 
-      supplier: "BONTAZ CENTRE MAROC", 
-      part: "152415573R", 
-      entries: [
-        { date: "2026-05-05", defect: "Conductivity Variation", insp: 240, rej: 0 }
-      ]
-    }
-];
+const DB_NAME = "AQLTrackerDB";
+const DB_VERSION = 1;
+const STORE_NAME = "trackerRecords";
+let db = null;
 
 let trackerRecords = [];
 let mainIndexToDelete = null;
 let subIndexToDelete = null;
 let expandedRows = new Set(); 
 
-function loadTrackerData() {
-    const savedRecords = localStorage.getItem('aqlTrackerRecords_v3');
-    if (savedRecords) {
-        trackerRecords = JSON.parse(savedRecords);
-    } else {
-        const v2Data = localStorage.getItem('aqlTrackerRecords_v2');
-        if (v2Data) {
-            try {
-                const old = JSON.parse(v2Data);
-                trackerRecords = old.map(item => ({
-                    status: item.status || "🟢 ACTIVE",
-                    supplier: item.supplier,
-                    part: item.part,
-                    entries: [{ date: item.date, defect: item.defect, insp: item.insp, rej: item.rej }]
-                }));
-            } catch(e) { trackerRecords = defaultRecords; }
+// Inicializar base de dados IndexedDB
+function initIndexedDB() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+        request.onerror = (e) => reject("Erro ao abrir base de dados local: " + e.target.error);
+        
+        request.onsuccess = (e) => {
+            db = e.target.result;
+            resolve(db);
+        };
+
+        request.onupgradeneeded = (e) => {
+            const database = e.target.result;
+            if (!database.objectStoreNames.contains(STORE_NAME)) {
+                // Usamos o part number como chave única estrutural
+                database.createObjectStore(STORE_NAME, { keyPath: "part" });
+            }
+        };
+    });
+}
+
+function getAllRecordsFromDB() {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_NAME], "readonly");
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.getAll();
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+function saveRecordToDB(record) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_NAME], "readwrite");
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.put(record);
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+    });
+}
+
+function deleteRecordFromDB(partKey) {
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction([STORE_NAME], "readwrite");
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.delete(partKey);
+
+        request.onsuccess = () => resolve();
+        request.onerror = () => reject(request.error);
+    });
+}
+
+// Inicialização e carregamento assíncrono dos dados
+async function loadTrackerData() {
+    try {
+        await initIndexedDB();
+        const savedRecords = await getAllRecordsFromDB();
+        
+        if (savedRecords && savedRecords.length > 0) {
+            // Ordenar por atividade ou ordem padrão (mantendo os dados consistentes)
+            trackerRecords = savedRecords;
         } else {
+            // Registos predefinidos padrão de segurança inicial
+            const defaultRecords = [
+                { status: "🟢 ACTIVE", supplier: "YAZAKI SYSTEMS TECHNOLOGIES FRANCE", part: "290Y16052R", entries: [{ date: "2026-05-05", defect: "Broken Pin", insp: 120, rej: 0 }] },
+                { status: "🟢 ACTIVE", supplier: "UNITED SPRINGS SAS", part: "82003262249", entries: [{ date: "2026-05-05", defect: "Deformated Spring", insp: 480, rej: 0 }] },
+                { status: "🟢 ACTIVE", supplier: "BONTAZ CENTRE MAROC", part: "152415573R", entries: [{ date: "2026-05-05", defect: "Conductivity Variation", insp: 240, rej: 0 }] }
+            ];
+            for (const rec of defaultRecords) {
+                await saveRecordToDB(rec);
+            }
             trackerRecords = defaultRecords;
         }
-        saveTrackerData();
+    } catch (err) {
+        console.error(err);
     }
 
+    // Recuperação de rascunhos rápidos de inputs mantém-se leve no localStorage
     document.getElementById('trackPart').value = localStorage.getItem('draftPart') || '';
     document.getElementById('trackSupplier').value = localStorage.getItem('draftSupplier') || '';
     document.getElementById('trackDefect').value = localStorage.getItem('draftDefect') || '';
     
     updatePartsDropdown();
-}
-
-function saveTrackerData() {
-    localStorage.setItem('aqlTrackerRecords_v3', JSON.stringify(trackerRecords));
+    renderTrackerTable();
 }
 
 function updatePartsDropdown() {
@@ -525,7 +559,7 @@ document.getElementById('trackPart').addEventListener('input', function() {
     });
 });
 
-function toggleStatus(index, event) {
+async function toggleStatus(index, event) {
     event.stopPropagation(); 
     if (trackerRecords[index]) {
         if (trackerRecords[index].status === "🟢 ACTIVE") {
@@ -536,7 +570,7 @@ function toggleStatus(index, event) {
                 trackerRecords[index].entries[0].date = new Date().toISOString().split('T')[0];
             }
         }
-        saveTrackerData();
+        await saveRecordToDB(trackerRecords[index]);
         renderTrackerTable();
     }
 }
@@ -584,7 +618,6 @@ function renderTrackerTable() {
 
         const isExpanded = expandedRows.has(index);
 
-        // 1. Linha Principal (Acumulada)
         const trMain = document.createElement('tr');
         trMain.id = `main-row-${index}`;
         trMain.className = `tr-main ${isExpanded ? 'expanded' : ''}`;
@@ -608,7 +641,6 @@ function renderTrackerTable() {
         `;
         tbody.appendChild(trMain);
 
-        // 2. Sub-linhas (Registos individuais internos)
         rec.entries.forEach((entry, subIndex) => {
             const trSub = document.createElement('tr');
             trSub.className = `tr-sub sub-row-${index}`;
@@ -631,7 +663,7 @@ function renderTrackerTable() {
     });
 }
 
-function addTrackerRecord() {
+async function addTrackerRecord() {
     const supplier = document.getElementById('trackSupplier').value.trim();
     const part = document.getElementById('trackPart').value.trim();
     const defect = document.getElementById('trackDefect').value.trim();
@@ -664,19 +696,21 @@ function addTrackerRecord() {
         const updatedRecord = trackerRecords.splice(existingIndex, 1)[0];
         trackerRecords.unshift(updatedRecord);
         
+        await saveRecordToDB(updatedRecord);
         expandedRows.clear();
         expandedRows.add(0);
     } else {
-        trackerRecords.unshift({
+        const newRecord = {
             status: "🟢 ACTIVE",
             supplier: supplier,
             part: part,
             entries: [newSubEntry]
-        });
+        };
+        trackerRecords.unshift(newRecord);
+        await saveRecordToDB(newRecord);
         expandedRows.clear();
     }
 
-    saveTrackerData();
     updatePartsDropdown();
     renderTrackerTable();
 
@@ -687,18 +721,16 @@ function addTrackerRecord() {
     document.getElementById('trackDefect').value = '';
     
     ['draftPart', 'draftSupplier', 'draftDefect'].forEach(key => localStorage.removeItem(key));
-    
     document.getElementById('trackerBody').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-// LÓGICA DE MODAL E RELEÇÃO DE APAGAR
 function askDeleteMain(index, event) {
     event.stopPropagation(); 
     mainIndexToDelete = index;
-    subIndexToDelete = null; // null significa apagar o bloco todo
+    subIndexToDelete = null;
     
     document.getElementById('deleteModalTitle').textContent = 'Eliminar Part Number?';
-    document.getElementById('deleteModalText').textContent = `Tem a certeza que deseja remover o Part Number "${trackerRecords[index].part}" e TODO o seu histórico de sub-registos?`;
+    document.getElementById('deleteModalText').textContent = `Tem a certeza que deseja remover o Part Number "${trackerRecords[index].part}" e TODO o seu histórico de sub-registos da base de dados local?`;
     document.getElementById('deleteModal').style.display = 'flex';
 }
 
@@ -719,36 +751,13 @@ function closeDeleteModal() {
     subIndexToDelete = null;
 }
 
-function executeDeleteRecord() {
+async function executeDeleteRecord() {
     if (mainIndexToDelete !== null) {
+        const recordTarget = trackerRecords[mainIndexToDelete];
+        
         if (subIndexToDelete === null) {
-            // Apagar linha principal inteira
+            // Apagar bloco completo da IndexedDB
             trackerRecords.splice(mainIndexToDelete, 1);
             expandedRows.delete(mainIndexToDelete);
-        } else {
-            // Apagar apenas o sub-registo selecionado
-            trackerRecords[mainIndexToDelete].entries.splice(subIndexToDelete, 1);
-            
-            // Se não sobrarem mais sub-registos, elimina a linha principal por completo
-            if (trackerRecords[mainIndexToDelete].entries.length === 0) {
-                trackerRecords.splice(mainIndexToDelete, 1);
-                expandedRows.delete(mainIndexToDelete);
-            }
+            await deleteRecordFromDB(recordTarget.part);
         }
-        
-        saveTrackerData();
-        updatePartsDropdown();
-        renderTrackerTable();
-    }
-    closeDeleteModal();
-}
-
-// Inicialização segura da página
-document.getElementById('trackDate').valueAsDate = new Date();
-renderDots('sev', 5); renderDots('occ', 3); renderDots('det', 3);
-calc();
-loadTrackerData();
-renderTrackerTable();
-</script>
-</body>
-</html>

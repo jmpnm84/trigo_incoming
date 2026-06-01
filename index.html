@@ -4,15 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>AQL Inspection Tracker Pro</title>
-  
   <link id="manifest-placeholder" rel="manifest" href="">
-
   <meta name="theme-color" content="#2196F3">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-  
   <style>
     :root {
       --md-sys-color-primary: #2196F3;
@@ -27,303 +21,146 @@
       --color-danger-bg: #FFDAD7;
       --color-success: #006D44;
       --color-success-bg: #D4EAD6;
-      --color-info: #0061A4;
-      --color-info-bg: #D1E4FF;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    body { background-color: var(--md-sys-color-surface); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--md-text-primary); padding: 16px; display: flex; justify-content: center; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background-color: var(--md-sys-color-surface); font-family: sans-serif; color: var(--md-text-primary); padding: 16px; display: flex; justify-content: center; }
     .app { width: 100%; max-width: 440px; }
-    .hdr { display: flex; align-items: center; gap: 14px; padding: 8px 4px 20px; }
-    .hdr-icon { width: 44px; height: 44px; border-radius: 12px; background: var(--md-sys-color-primary); display: flex; align-items: center; justify-content: center; }
-    .hdr-icon i { color: var(--md-sys-color-on-primary); font-size: 22px; }
-    .hdr-text h1 { font-size: 20px; font-weight: 600; letter-spacing: -0.2px; }
-    .hdr-text p { font-size: 13px; color: var(--md-text-secondary); }
-    .card { background: var(--md-sys-color-surface-variant); border: 1px solid var(--md-sys-color-outline); border-radius: 16px; margin-bottom: 16px; box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.05); overflow: hidden; }
-    .card-hdr { padding: 14px 16px; border-bottom: 1px solid var(--md-sys-color-outline); display: flex; align-items: center; justify-content: space-between; }
-    .card-hdr span { font-size: 12px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; color: var(--md-text-secondary); }
+    .hdr { display: flex; align-items: flex-start; justify-content: space-between; padding: 8px 4px 20px; }
+    .hdr-main { display: flex; align-items: center; gap: 14px; }
+    .hdr-icon { width: 44px; height: 44px; border-radius: 12px; background: var(--md-sys-color-primary); display: flex; align-items: center; justify-content: center; color: white; }
+    .version { font-size: 10px; color: var(--md-text-tertiary); font-weight: 700; }
+    .card { background: var(--md-sys-color-surface-variant); border: 1px solid var(--md-sys-color-outline); border-radius: 16px; margin-bottom: 16px; overflow: hidden; }
+    .card-hdr { padding: 14px 16px; border-bottom: 1px solid var(--md-sys-color-outline); font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--md-text-secondary); }
     .form-grid { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 16px; }
     .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .input-group { display: flex; flex-direction: column; gap: 6px; }
     .input-group label { font-size: 12px; font-weight: 600; color: var(--md-text-secondary); }
-    .form-control { width: 100%; font-size: 14px; font-weight: 500; font-family: inherit; background: #F1F3F5; border: 1px solid transparent; border-radius: 10px; padding: 10px 12px; color: var(--md-text-primary); outline: none; transition: border-color 0.2s, background 0.2s; }
-    .form-control:focus { border-color: var(--md-sys-color-primary); background: #FFFFFF; }
-    select.form-control { appearance: none; background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+    .form-control { width: 100%; font-size: 14px; padding: 10px 12px; background: #F1F3F5; border: 1px solid transparent; border-radius: 10px; }
     .sod-grid { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--md-sys-color-outline); }
-    .sod-cell { padding: 16px 8px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-    .sod-cell:not(:last-child) { border-right: 1px solid var(--md-sys-color-outline); }
-    .sod-label { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--md-text-tertiary); }
-    .sod-cell input[type=number] { width: 100%; text-align: center; font-size: 26px; font-weight: 600; color: var(--md-text-primary); background: transparent; border: none; outline: none; pointer-events: none; }
-    .sod-stepper { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0 2px; }
-    .sod-stepper button { width: 28px; height: 28px; border-radius: 50%; background: #F1F3F5; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-    .result-body { padding: 18px 16px; }
-    .cat-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 8px; margin-bottom: 12px; }
+    .sod-cell { padding: 16px 8px; display: flex; flex-direction: column; align-items: center; gap: 8px; border-right: 1px solid var(--md-sys-color-outline); }
+    .sod-label { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--md-text-tertiary); }
+    .sod-stepper { display: flex; align-items: center; gap: 4px; }
+    .sod-stepper button { width: 28px; height: 28px; border-radius: 50%; border: none; cursor: pointer; }
+    .sod-stepper input { width: 30px; text-align: center; border: none; font-weight: 700; background: transparent; }
     .metrics { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--md-sys-color-outline); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .met { background: #F1F3F5; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
-    .met-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--md-text-tertiary); }
-    .met-val { font-size: 20px; font-weight: 700; color: var(--md-text-primary); }
-    .met-unit { font-size: 11px; font-weight: 500; color: var(--md-text-secondary); }
-    .triagem-body { padding: 16px; }
-    .triagem-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; }
-    .triagem-row:not(:last-child) { border-bottom: 1px solid var(--md-sys-color-outline); }
-    .counter-wrapper { display: flex; align-items: center; background: #F1F3F5; border-radius: 10px; padding: 2px; }
-    .counter-btn { width: 36px; height: 36px; border-radius: 8px; background: white; border: 1px solid var(--md-sys-color-outline); display: flex; align-items: center; justify-content: center; cursor: pointer; }
-    .counter-input { font-size: 16px; font-weight: 700; width: 60px; text-align: center; border: none; background: transparent; outline: none; }
-    .status-banner { padding: 12px 16px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; border-radius: 12px; margin-top: 14px; justify-content: center; }
-    .btn-submit { width: 100%; background: var(--md-sys-color-primary); color: white; border: none; padding: 14px; font-size: 14px; font-weight: 600; border-radius: 12px; margin-top: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .btn-clear-all { background: var(--color-danger-bg); color: var(--color-danger); border: 1px solid var(--color-danger); padding: 6px 12px; font-size: 11px; font-weight: 700; border-radius: 8px; cursor: pointer; }
-    .btn-delete-row { background: transparent; border: none; color: var(--color-danger); cursor: pointer; padding: 4px; }
-    .table-container { overflow-x: auto; padding: 0 16px 16px; }
-    .db-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
-    .db-table th { background: #F1F3F5; padding: 10px; font-weight: 700; color: var(--md-text-secondary); border-bottom: 2px solid var(--md-sys-color-outline); }
-    .db-table td { padding: 10px; border-bottom: 1px solid var(--md-sys-color-outline); }
-    .badge { padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 10px; }
-    .badge-active { background: var(--color-success-bg); color: var(--color-success); }
-    .badge-suspended { background: var(--color-danger-bg); color: var(--color-danger); }
+    .met { background: #F1F3F5; border-radius: 12px; padding: 12px; text-align: center; }
+    .met-val { font-size: 18px; font-weight: 700; color: var(--md-sys-color-primary); }
+    .met-lbl { font-size: 10px; font-weight: 700; color: var(--md-text-tertiary); }
+    .status-banner { padding: 12px; text-align: center; font-weight: 600; border-radius: 12px; margin-top: 10px; }
+    .btn-submit { width: 100%; background: var(--md-sys-color-primary); color: white; border: none; padding: 12px; border-radius: 12px; cursor: pointer; margin-top: 10px; }
+    .db-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    .db-table th { background: #F1F3F5; padding: 8px; text-align: left; }
+    .db-table td { padding: 8px; border-bottom: 1px solid var(--md-sys-color-outline); }
   </style>
 </head>
 <body>
 
 <div class="app">
   <header class="hdr">
-    <div class="hdr-icon"><i class="ti ti-database"></i></div>
-    <div class="hdr-text">
-      <h1>AQL Inspector Tracker</h1>
-      <p>Base de dados e triagem operacional</p>
+    <div class="hdr-main">
+      <div class="hdr-icon"><i class="ti ti-database"></i></div>
+      <div class="hdr-text"><h1>AQL Tracker</h1></div>
     </div>
+    <div class="version">v1.0.0</div>
   </header>
 
   <section class="card">
-    <div class="card-hdr"><span>Parâmetros de Qualidade & FMEA</span></div>
+    <div class="card-hdr">Parâmetros de Qualidade</div>
     <div class="sod-grid">
-      <div class="sod-cell">
-        <span class="sod-label">Severity</span>
-        <div class="sod-stepper">
-          <button onclick="step('sev',-1)"><i class="ti ti-minus"></i></button>
-          <input type="number" id="sev" min="1" max="10" value="5" readonly>
-          <button onclick="step('sev',1)"><i class="ti ti-plus"></i></button>
-        </div>
-      </div>
-      <div class="sod-cell">
-        <span class="sod-label">Occurrence</span>
-        <div class="sod-stepper">
-          <button onclick="step('occ',-1)"><i class="ti ti-minus"></i></button>
-          <input type="number" id="occ" min="1" max="10" value="3" readonly>
-          <button onclick="step('occ',1)"><i class="ti ti-plus"></i></button>
-        </div>
-      </div>
-      <div class="sod-cell">
-        <span class="sod-label">Detection</span>
-        <div class="sod-stepper">
-          <button onclick="step('det',-1)"><i class="ti ti-minus"></i></button>
-          <input type="number" id="det" min="1" max="10" value="3" readonly>
-          <button onclick="step('det',1)"><i class="ti ti-plus"></i></button>
-        </div>
-      </div>
+      <div class="sod-cell"><span class="sod-label">Sev</span><div class="sod-stepper"><button onclick="step('sev',-1)">-</button><input type="number" id="sev" value="5" readonly><button onclick="step('sev',1)">+</button></div></div>
+      <div class="sod-cell"><span class="sod-label">Occ</span><div class="sod-stepper"><button onclick="step('occ',-1)">-</button><input type="number" id="occ" value="3" readonly><button onclick="step('occ',1)">+</button></div></div>
+      <div class="sod-cell" style="border-right:none"><span class="sod-label">Det</span><div class="sod-stepper"><button onclick="step('det',-1)">-</button><input type="number" id="det" value="3" readonly><button onclick="step('det',1)">+</button></div></div>
     </div>
     <div class="form-grid">
       <div class="form-row-2">
-        <div class="input-group">
-          <label for="lot">Tamanho do Lote</label>
-          <input type="number" class="form-control" id="lot" min="1" value="2000" oninput="calc()">
-        </div>
-        <div class="input-group">
-          <label for="hist">Histórico Compl.</label>
-          <select class="form-control" id="hist" onchange="calc()">
-            <option value="Normal">Normal</option>
-            <option value="NCs Menores">Minor NCs</option>
-            <option value="NCs Maiores">Major NCs</option>
-          </select>
-        </div>
+        <div class="input-group"><label>Lote</label><input type="number" class="form-control" id="lot" value="2000" oninput="calc()"></div>
+        <div class="input-group"><label>Histórico</label><select class="form-control" id="hist" onchange="calc()"><option value="Normal">Normal</option><option value="Minor">Minor</option><option value="Major">Major</option></select></div>
       </div>
     </div>
   </section>
 
   <section class="card" id="result-card">
-    <div class="card-hdr"><span>Identificação de Categoria & Plano AQL</span></div>
-    <div class="result-body">
-      <div class="cat-pill" id="cat-pill"></div>
-      <p class="result-msg" id="result-msg"></p>
-      <div class="metrics" id="metrics" style="display:none;"></div>
+    <div class="card-hdr">Plano AQL</div>
+    <div style="padding:16px;">
+      <div id="cat-pill" style="font-weight:700; margin-bottom:10px;"></div>
+      <div class="metrics" id="metrics" style="display:none;">
+        <div class="met"><div class="met-val" id="n-val">-</div><div class="met-lbl">Amostra (n)</div></div>
+        <div class="met"><div class="met-val" id="c-val">-</div><div class="met-lbl">Rejeição (c)</div></div>
+      </div>
     </div>
   </section>
 
-  <section class="card">
-    <div class="card-hdr"><span>Identificação & Status do Item</span></div>
+  <section class="card" id="triagem-card" style="display:none;">
+    <div class="card-hdr">Triagem</div>
     <div class="form-grid">
-      <div class="form-row-2">
-        <div class="input-group">
-          <label for="status-item">Estado do Item</label>
-          <select id="status-item" class="form-control">
-            <option value="ACTIVE">🟢 ACTIVE</option>
-            <option value="SUSPENDED">🔴 SUSPENDED</option>
-          </select>
-        </div>
-        <div class="input-group">
-          <label for="date-inicio">Data de Início</label>
-          <input type="date" id="date-inicio" class="form-control">
-        </div>
-      </div>
-      <div class="form-row-2">
-        <div class="input-group">
-          <label for="part-number">Part Number</label>
-          <input type="text" id="part-number" class="form-control" placeholder="Ex: 290Y16052R" oninput="autoCompletePart()">
-        </div>
-        <div class="input-group">
-          <label for="supplier">Supplier (Fornecedor)</label>
-          <input type="text" id="supplier" class="form-control" placeholder="Introduza ou auto-preencha...">
-        </div>
-      </div>
-      <div class="input-group">
-        <label for="description">Descrição do Item</label>
-        <input type="text" id="description" class="form-control" placeholder="Ex: CONN-ELEC">
-      </div>
-      <div class="form-row-2">
-        <div class="input-group">
-          <label for="hist-defeito">Histórico de Defeito</label>
-          <input type="text" id="hist-defeito" list="lista-defeitos-sugeridos" class="form-control" placeholder="Selecione ou escreva...">
-          <datalist id="lista-defeitos-sugeridos">
-            <option value="Broken Pin"><option value="Deformated / Bent"><option value="Burr / Flashes"><option value="Scratches / Surface Damage"><option value="Contamination / Dirty"><option value="Conductivity Variation"><option value="Dimensional Non-Compliance"><option value="Cracks / Fissures"><option value="Terminal/Clip Non-Compliance"><option value="Sealing Surface Integrity"><option value="Oxidation / Rust">
-          </datalist>
-        </div>
-        <div class="input-group">
-          <label for="metodo-inspecao">Método de Inspeção</label>
-          <input type="text" id="metodo-inspecao" class="form-control" placeholder="Ex: Visual Control">
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="card" id="triagem-card" style="display: none;">
-    <div class="card-hdr"><span>Triagem & Indicadores Operacionais</span></div>
-    <div class="triagem-body">
-      <div class="triagem-row">
-        <div class="triagem-info">
-          <span class="triagem-name">Quantidade Total Inspecionada</span>
-        </div>
-        <div class="counter-wrapper">
-          <button class="counter-btn" onclick="stepTriagem('total-inspecionado', -1)"><i class="ti ti-minus"></i></button>
-          <input type="number" id="total-inspecionado" class="counter-input" value="0" oninput="validarTriagem()">
-          <button class="counter-btn" onclick="stepTriagem('total-inspecionado', 1)"><i class="ti ti-plus"></i></button>
-        </div>
-      </div>
-      <div class="triagem-row">
-        <div class="triagem-info">
-          <span class="triagem-name">Quantidade Total Rejeitada</span>
-        </div>
-        <div class="counter-wrapper">
-          <button class="counter-btn" onclick="stepTriagem('total-rejeitado', -1)"><i class="ti ti-minus"></i></button>
-          <input type="number" id="total-rejeitado" class="counter-input" value="0" oninput="validarTriagem()">
-          <button class="counter-btn" onclick="stepTriagem('total-rejeitado', 1)"><i class="ti ti-plus"></i></button>
-        </div>
-      </div>
-      <div id="triagem-status-banner" class="status-banner"></div>
-      <button class="btn-submit" onclick="salvarRegistro()"><i class="ti ti-device-floppy"></i> Salvar e Registrar no Tracker</button>
+      <div class="input-group"><label>Total Inspecionado</label><input type="number" class="form-control" id="total-insp" value="0" oninput="validar()"></div>
+      <div class="input-group"><label>Total Rejeitado</label><input type="number" class="form-control" id="total-rej" value="0" oninput="validar()"></div>
+      <div id="status-banner" class="status-banner">Aguardando...</div>
+      <button class="btn-submit" onclick="salvar()">Salvar Registro</button>
     </div>
   </section>
 
   <section class="card">
-    <div class="card-hdr">
-      <span>Base de Dados Real-Time (Histórico)</span>
-      <button class="btn-clear-all" onclick="limparHistoricoCompleto()"><i class="ti ti-trash"></i> Limpar Tudo</button>
-    </div>
-    <div class="table-container">
-      <table class="db-table">
-        <thead><tr><th>Control No.</th><th>Status</th><th>Start Date</th><th>Supplier</th><th>Part Number</th><th>Hist. Defect</th><th>Inspected</th><th>Rejected</th><th>Ações</th></tr></thead>
-        <tbody id="db-rows"></tbody>
-      </table>
-    </div>
+    <div class="card-hdr">Histórico</div>
+    <table class="db-table"><tbody id="db-rows"></tbody></table>
   </section>
 </div>
 
 <script>
-  // 1. MANIFEST DINÂMICO VIA BLOB
-  const manifest = {
-    "name": "AQL Inspection Tracker Pro",
-    "short_name": "AQL Tracker",
-    "display": "standalone",
-    "start_url": window.location.href,
-    "background_color": "#F8F9FA",
-    "theme_color": "#2196F3",
-    "icons": [{ "src": "https://cdn-icons-png.flaticon.com/512/2921/2921222.png", "sizes": "512x512", "type": "image/png" }]
-  };
-  const blobManifest = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
-  document.getElementById('manifest-placeholder').href = URL.createObjectURL(blobManifest);
+  const DB = [
+    {min: 1, s: 32, n: 32, r25: 2, r15: 1, r10: 1},
+    {min: 200, s: 50, n: 50, r25: 3, r15: 2, r10: 1},
+    {min: 500, s: 80, n: 80, r25: 4, r15: 3, r10: 2},
+    {min: 1200, s: 125, n: 125, r25: 6, r15: 4, r10: 3},
+    {min: 3200, s: 200, n: 200, r25: 8, r15: 6, r10: 4}
+  ];
 
-  // 2. SERVICE WORKER DINÂMICO VIA BLOB
-  if ('serviceWorker' in navigator) {
-    const swCode = `self.addEventListener('fetch', () => {});`;
-    const blobSW = new Blob([swCode], {type: 'application/javascript'});
-    navigator.serviceWorker.register(URL.createObjectURL(blobSW));
-  }
+  let limite = 0;
 
-  // Lógica do App
-  document.getElementById('date-inicio').valueAsDate = new Date();
-  let DADOS_CONHECIDOS = JSON.parse(localStorage.getItem('aql_tracker_parts')) || {
-    "290Y16052R": { supplier: "YAZAKI", desc: "CONN-ELEC", defect: "Broken Pin", method: "Visual Control" }
-  };
+  function step(id, d) { let el = document.getElementById(id); el.value = Math.max(1, Math.min(10, parseInt(el.value) + d)); calc(); }
 
-  const DB = [{ min: 1, s: 32, a25: 1, r25: 2, a15: 0, r15: 1, a10: 0, r10: 1 }, { min: 200, s: 50, a25: 2, r25: 3, a15: 1, r15: 2, a10: 0, r10: 1 }, { min: 500, s: 80, a25: 3, r25: 4, a15: 2, r15: 3, a10: 1, r10: 2 }, { min: 1200, s: 125, a25: 5, r25: 6, a15: 3, r15: 4, a10: 2, r10: 3 }, { min: 3200, s: 200, a25: 7, r25: 8, a15: 5, r15: 6, a10: 3, r10: 4 }];
-  let limiteRejeitar = 0;
-
-  function lookup(lot) { let r = DB[0]; for (const x of DB) { if (lot >= x.min) r = x; else break; } return r; }
-  function step(id, d) { document.getElementById(id).value = Math.min(Math.max((+document.getElementById(id).value || 1) + d, 1), 10); calc(); }
-  function stepTriagem(id, d) { document.getElementById(id).value = Math.max((+document.getElementById(id).value || 0) + d, 0); validarTriagem(); }
-  
   function calc() {
-    const S = +document.getElementById('sev').value, O = +document.getElementById('occ').value, D = +document.getElementById('det').value;
-    const lot = Math.max(+document.getElementById('lot').value || 1, 1);
-    const rpn = S * O * D;
-    const cat = rpn >= 50 || S === 10 ? 'A' : rpn < 36 ? 'C' : 'B';
-    const pill = document.getElementById('cat-pill'), rc = document.getElementById('result-card'), met = document.getElementById('metrics'), triagemCard = document.getElementById('triagem-card');
+    const s = +document.getElementById('sev').value, o = +document.getElementById('occ').value, det = +document.getElementById('det').value;
+    const lot = +document.getElementById('lot').value, hist = document.getElementById('hist').value;
+    const rpn = s * o * det;
+    const cat = rpn >= 50 || s === 10 ? 'A' : (rpn < 36 ? 'C' : 'B');
     
-    if (cat !== 'B') {
-      pill.innerHTML = cat === 'A' ? 'Categoria A - Alto Risco' : 'Categoria C - Baixo Risco';
-      met.style.display = 'none'; triagemCard.style.display = 'none';
+    document.getElementById('cat-pill').innerText = `Categoria ${cat}`;
+    const met = document.getElementById('metrics'), triagem = document.getElementById('triagem-card');
+
+    if (cat === 'B') {
+      const row = DB.slice().reverse().find(x => lot >= x.min) || DB[0];
+      limite = (hist === 'Normal' ? row.r25 : (hist === 'Minor' ? row.r15 : row.r10));
+      document.getElementById('n-val').innerText = row.n;
+      document.getElementById('c-val').innerText = limite;
+      met.style.display = 'grid'; triagem.style.display = 'block';
+      document.getElementById('total-insp').value = row.n;
     } else {
-      const row = lookup(lot);
-      limiteRejeitar = (document.getElementById('hist').value === 'Normal' ? row.r25 : document.getElementById('hist').value === 'NCs Menores' ? row.r15 : row.r10);
-      document.getElementById('total-inspecionado').value = row.s;
-      met.style.display = 'grid'; triagemCard.style.display = 'block';
-      validarTriagem();
+      met.style.display = 'none'; triagem.style.display = 'none';
     }
+    validar();
   }
 
-  function validarTriagem() {
-    const rej = +document.getElementById('total-rejeitado').value || 0;
-    const banner = document.getElementById('triagem-status-banner');
-    banner.innerHTML = rej >= limiteRejeitar ? '❌ Lote Rejeitado' : '✅ Lote Aceito';
-    banner.style.background = rej >= limiteRejeitar ? 'var(--color-danger-bg)' : 'var(--color-success-bg)';
+  function validar() {
+    const rej = +document.getElementById('total-rej').value;
+    const b = document.getElementById('status-banner');
+    b.innerText = rej >= limite ? '❌ REJEITADO' : '✅ ACEITE';
+    b.style.background = rej >= limite ? 'var(--color-danger-bg)' : 'var(--color-success-bg)';
   }
 
-  function salvarRegistro() {
-    let dados = JSON.parse(localStorage.getItem('aql_tracker_db')) || [];
-    dados.push({
-      id: dados.length + 1,
-      status: document.getElementById('status-item').value,
-      data: document.getElementById('date-inicio').value,
-      supplier: document.getElementById('supplier').value,
-      partNumber: document.getElementById('part-number').value,
-      inspected: document.getElementById('total-inspecionado').value,
-      rejected: document.getElementById('total-rejeitado').value
-    });
-    localStorage.setItem('aql_tracker_db', JSON.stringify(dados));
-    carregarBancoDados();
+  function salvar() {
+    let db = JSON.parse(localStorage.getItem('db') || '[]');
+    db.push({ insp: document.getElementById('total-insp').value, rej: document.getElementById('total-rej').value });
+    localStorage.setItem('db', JSON.stringify(db));
+    carregar();
   }
 
-  function carregarBancoDados() {
-    const dados = JSON.parse(localStorage.getItem('aql_tracker_db')) || [];
-    document.getElementById('db-rows').innerHTML = dados.map((i, idx) => `<tr><td>#${i.id}</td><td>${i.status}</td><td>${i.data}</td><td>${i.supplier}</td><td>${i.partNumber}</td><td>${i.inspected}</td><td>${i.rejected}</td><td><button class="btn-delete-row" onclick="eliminar(${idx})"><i class="ti ti-trash"></i></button></td></tr>`).join('');
+  function carregar() {
+    const db = JSON.parse(localStorage.getItem('db') || '[]');
+    document.getElementById('db-rows').innerHTML = db.map(i => `<tr><td>Inspecionados: ${i.insp}</td><td>Rejeitados: ${i.rej}</td></tr>`).join('');
   }
 
-  function eliminar(idx) {
-    let d = JSON.parse(localStorage.getItem('aql_tracker_db'));
-    d.splice(idx, 1); localStorage.setItem('aql_tracker_db', JSON.stringify(d));
-    carregarBancoDados();
-  }
-
-  function limparHistoricoCompleto() { if(confirm("Apagar tudo?")) { localStorage.removeItem('aql_tracker_db'); carregarBancoDados(); } }
-
-  calc(); carregarBancoDados();
+  calc(); carregar();
 </script>
 </body>
 </html>

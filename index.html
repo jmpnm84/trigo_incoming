@@ -48,6 +48,7 @@
     }
 
     header {
+      position: relative;
       width: 100%;
       background: #ffffff;
       border-bottom: 1px solid var(--border);
@@ -55,6 +56,19 @@
       display: flex;
       align-items: center;
       gap: 16px;
+    }
+
+    .version-badge {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      color: var(--muted);
+      background: var(--surface);
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
     }
 
     .logo-icon {
@@ -139,10 +153,22 @@
     th { background: var(--surface); color: var(--muted); font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
     td { color: var(--text); }
     .td-number { font-family: var(--font-body); font-weight: 500; }
-    .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; transition: all 0.2s ease; }
+    .status-badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.76rem; font-weight: bold; transition: all 0.2s ease; }
     
     .btn-delete { background: none; border: none; color: var(--danger); font-size: 1.1rem; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; }
     .btn-delete:active { opacity: 0.5; }
+    .btn-delete-sub { font-size: 0.9rem; padding: 2px; opacity: 0.7; }
+    .btn-delete-sub:hover { opacity: 1; }
+
+    /* Estilos das Sub-linhas expansíveis */
+    .tr-main { cursor: pointer; }
+    .tr-main:hover { background-color: #f8fafc; }
+    .toggle-icon { display: inline-block; width: 12px; transition: transform 0.2s ease; font-size: 0.75rem; margin-right: 4px; color: var(--muted); }
+    .tr-main.expanded .toggle-icon { transform: rotate(90deg); }
+    
+    .tr-sub { background-color: #f8fafc; display: none; }
+    .tr-sub td { padding: 8px 14px; border-bottom: 1px dashed var(--border); color: var(--muted); font-size: 0.8rem; }
+    .sub-badge { background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 600; }
 
     /* MODAL DE CONFIRMAÇÃO */
     .modal-overlay {
@@ -184,6 +210,7 @@
 <body>
 
 <header>
+  <div class="version-badge">v1.0.0</div>
   <div class="logo-icon">🔬</div>
   <div class="header-text">
     <h1>AQL Inspector</h1>
@@ -287,12 +314,12 @@
                 <tr>
                     <th>Ação</th>
                     <th>Status</th>
-                    <th>Data</th>
+                    <th>Última Data</th>
                     <th>Part Number</th>
                     <th>Fornecedor</th>
-                    <th>Defeito Histórico</th>
-                    <th>Qtd Insp.</th>
-                    <th>Qtd Rej.</th>
+                    <th>Defeitos</th>
+                    <th>Total Insp.</th>
+                    <th>Total Rej.</th>
                 </tr>
             </thead>
             <tbody id="trackerBody"></tbody>
@@ -303,8 +330,8 @@
 
 <div class="modal-overlay" id="deleteModal">
   <div class="modal-box">
-    <div class="modal-title">Eliminar Registo?</div>
-    <div class="modal-text">Tem a certeza que deseja remover este registo do histórico? Esta ação não pode ser desfeita.</div>
+    <div class="modal-title" id="deleteModalTitle">Eliminar Registo?</div>
+    <div class="modal-text" id="deleteModalText">Tem a certeza que deseja remover este registo do histórico? Esta ação não pode ser desfeita.</div>
     <div class="modal-buttons">
       <button class="btn-modal btn-modal-cancel" onclick="closeDeleteModal()">Cancelar</button>
       <button class="btn-modal btn-modal-confirm" onclick="executeDeleteRecord()">Eliminar</button>
@@ -393,23 +420,59 @@ function calc() {
 }
 
 // ==========================================
-// LÓGICA: INCOMING CONTROL TRACKER (V2)
+// LÓGICA: INCOMING CONTROL TRACKER (V3.1 - Sub-deletes)
 // ==========================================
 const defaultRecords = [
-    { status: "🟢 ACTIVE", date: "2026-05-05", supplier: "YAZAKI SYSTEMS TECHNOLOGIES FRANCE", part: "290Y16052R", defect: "Broken Pin", insp: 120, rej: 0 },
-    { status: "🟢 ACTIVE", date: "2026-05-05", supplier: "UNITED SPRINGS SAS", part: "82003262249", defect: "Deformated Spring", insp: 480, rej: 0 },
-    { status: "🟢 ACTIVE", date: "2026-05-05", supplier: "BONTAZ CENTRE MAROC", part: "152415573R", defect: "Conductivity Variation", insp: 240, rej: 0 }
+    { 
+      status: "🟢 ACTIVE", 
+      supplier: "YAZAKI SYSTEMS TECHNOLOGIES FRANCE", 
+      part: "290Y16052R", 
+      entries: [
+        { date: "2026-05-05", defect: "Broken Pin", insp: 120, rej: 0 }
+      ]
+    },
+    { 
+      status: "🟢 ACTIVE", 
+      supplier: "UNITED SPRINGS SAS", 
+      part: "82003262249", 
+      entries: [
+        { date: "2026-05-05", defect: "Deformated Spring", insp: 480, rej: 0 }
+      ]
+    },
+    { 
+      status: "🟢 ACTIVE", 
+      supplier: "BONTAZ CENTRE MAROC", 
+      part: "152415573R", 
+      entries: [
+        { date: "2026-05-05", defect: "Conductivity Variation", insp: 240, rej: 0 }
+      ]
+    }
 ];
 
 let trackerRecords = [];
-let indexToUpdate = null;
+let mainIndexToDelete = null;
+let subIndexToDelete = null;
+let expandedRows = new Set(); 
 
 function loadTrackerData() {
-    const savedRecords = localStorage.getItem('aqlTrackerRecords_v2');
+    const savedRecords = localStorage.getItem('aqlTrackerRecords_v3');
     if (savedRecords) {
         trackerRecords = JSON.parse(savedRecords);
     } else {
-        trackerRecords = defaultRecords;
+        const v2Data = localStorage.getItem('aqlTrackerRecords_v2');
+        if (v2Data) {
+            try {
+                const old = JSON.parse(v2Data);
+                trackerRecords = old.map(item => ({
+                    status: item.status || "🟢 ACTIVE",
+                    supplier: item.supplier,
+                    part: item.part,
+                    entries: [{ date: item.date, defect: item.defect, insp: item.insp, rej: item.rej }]
+                }));
+            } catch(e) { trackerRecords = defaultRecords; }
+        } else {
+            trackerRecords = defaultRecords;
+        }
         saveTrackerData();
     }
 
@@ -421,7 +484,7 @@ function loadTrackerData() {
 }
 
 function saveTrackerData() {
-    localStorage.setItem('aqlTrackerRecords_v2', JSON.stringify(trackerRecords));
+    localStorage.setItem('aqlTrackerRecords_v3', JSON.stringify(trackerRecords));
 }
 
 function updatePartsDropdown() {
@@ -448,10 +511,11 @@ document.getElementById('trackPart').addEventListener('input', function() {
     const match = trackerRecords.find(rec => rec.part.toUpperCase() === currentPart.toUpperCase());
     if (match) {
         document.getElementById('trackSupplier').value = match.supplier;
-        document.getElementById('trackDefect').value = match.defect || '';
-        
+        if(match.entries && match.entries.length > 0) {
+            document.getElementById('trackDefect').value = match.entries[0].defect || '';
+            localStorage.setItem('draftDefect', match.entries[0].defect || '');
+        }
         localStorage.setItem('draftSupplier', match.supplier);
-        localStorage.setItem('draftDefect', match.defect || '');
     }
 });
 
@@ -461,16 +525,34 @@ document.getElementById('trackPart').addEventListener('input', function() {
     });
 });
 
-function toggleStatus(index) {
+function toggleStatus(index, event) {
+    event.stopPropagation(); 
     if (trackerRecords[index]) {
         if (trackerRecords[index].status === "🟢 ACTIVE") {
             trackerRecords[index].status = "🔴 INACTIVE";
         } else {
             trackerRecords[index].status = "🟢 ACTIVE";
-            trackerRecords[index].date = new Date().toISOString().split('T')[0];
+            if(trackerRecords[index].entries.length > 0) {
+                trackerRecords[index].entries[0].date = new Date().toISOString().split('T')[0];
+            }
         }
         saveTrackerData();
         renderTrackerTable();
+    }
+}
+
+function toggleRow(index) {
+    const rowEl = document.getElementById(`main-row-${index}`);
+    const subRows = document.querySelectorAll(`.sub-row-${index}`);
+    
+    if (expandedRows.has(index)) {
+        expandedRows.delete(index);
+        rowEl.classList.remove('expanded');
+        subRows.forEach(r => r.style.display = 'none');
+    } else {
+        expandedRows.add(index);
+        rowEl.classList.add('expanded');
+        subRows.forEach(r => r.style.display = 'table-row');
     }
 }
 
@@ -480,29 +562,72 @@ function renderTrackerTable() {
     tbody.innerHTML = '';
     
     trackerRecords.forEach((rec, index) => {
+        let totalInsp = 0;
+        let totalRej = 0;
+        let uniqueDefects = new Set();
+        let latestDate = rec.entries[0]?.date || '-';
+
+        rec.entries.forEach(e => {
+            totalInsp += e.insp;
+            totalRej += e.rej;
+            if(e.defect) uniqueDefects.add(e.defect);
+            if(new Date(e.date) > new Date(latestDate)) latestDate = e.date;
+        });
+
+        const defectsArr = [...uniqueDefects];
+        const defectsText = defectsArr.length > 0 ? defectsArr.join(', ') : '-';
+
         const isInactive = rec.status === "🔴 INACTIVE";
         const badgeStyle = isInactive 
             ? 'background: #fee2e2; color: #991b1b; cursor: pointer;' 
             : 'background: #dcfce7; color: #166534; cursor: pointer;';
 
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
+        const isExpanded = expandedRows.has(index);
+
+        // 1. Linha Principal (Acumulada)
+        const trMain = document.createElement('tr');
+        trMain.id = `main-row-${index}`;
+        trMain.className = `tr-main ${isExpanded ? 'expanded' : ''}`;
+        trMain.setAttribute('onclick', `toggleRow(${index})`);
+        
+        trMain.innerHTML = `
             <td>
-                <button class="btn-delete" onclick="askDeleteRecord(${index})" title="Eliminar Registo">🗑️</button>
+                <button class="btn-delete" onclick="askDeleteMain(${index}, event)" title="Eliminar Part Number completo">🗑️</button>
             </td>
             <td>
-                <span class="status-badge" style="${badgeStyle}" onclick="toggleStatus(${index})" title="Clique para alterar o estado">
+                <span class="status-badge" style="${badgeStyle}" onclick="toggleStatus(${index}, event)" title="Clique para alterar o estado">
                     ${rec.status}
                 </span>
             </td>
-            <td>${rec.date}</td>
-            <td>${rec.part}</td>
+            <td>${latestDate}</td>
+            <td><span class="toggle-icon">▶</span><strong>${rec.part}</strong></td>
             <td><strong>${rec.supplier}</strong></td>
-            <td>${rec.defect || '-'}</td>
-            <td class="td-number">${rec.insp}</td>
-            <td class="td-number" style="color: ${rec.rej > 0 ? 'var(--danger)' : 'inherit'}">${rec.rej}</td>
+            <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;" title="${defectsText}">${defectsText}</td>
+            <td class="td-number" style="color: var(--accent2); font-weight:700;">${totalInsp}</td>
+            <td class="td-number" style="color: ${totalRej > 0 ? 'var(--danger)' : 'inherit'}; font-weight:700;">${totalRej}</td>
         `;
-        tbody.appendChild(tr);
+        tbody.appendChild(trMain);
+
+        // 2. Sub-linhas (Registos individuais internos)
+        rec.entries.forEach((entry, subIndex) => {
+            const trSub = document.createElement('tr');
+            trSub.className = `tr-sub sub-row-${index}`;
+            if (isExpanded) trSub.style.display = 'table-row';
+
+            trSub.innerHTML = `
+                <td>
+                    <button class="btn-delete btn-delete-sub" onclick="askDeleteSub(${index}, ${subIndex}, event)" title="Eliminar apenas esta inspeção">🗑️</button>
+                </td>
+                <td style="text-align: right;"><span class="sub-badge">#${rec.entries.length - subIndex}</span></td>
+                <td>${entry.date}</td>
+                <td style="color: var(--muted); font-style: italic;">Sub-registo</td>
+                <td>—</td>
+                <td>${entry.defect || '-'}</td>
+                <td class="td-number">${entry.insp}</td>
+                <td class="td-number" style="color: ${entry.rej > 0 ? 'var(--danger)' : 'inherit'}">${entry.rej}</td>
+            `;
+            tbody.appendChild(trSub);
+        });
     });
 }
 
@@ -523,37 +648,38 @@ function addTrackerRecord() {
     const parsedRej = parseInt(rej) || 0;
     const finalDate = dateStr || new Date().toISOString().split('T')[0];
 
-    // Lógica CUMULATIVA: Procura se o Part Number já existe na tabela
+    const newSubEntry = {
+        date: finalDate,
+        defect: defect,
+        insp: parsedInsp,
+        rej: parsedRej
+    };
+
     const existingIndex = trackerRecords.findIndex(rec => rec.part.toUpperCase() === part.toUpperCase());
 
     if (existingIndex !== -1) {
-        // Se já existe, acumula os valores e atualiza metadados
-        trackerRecords[existingIndex].insp += parsedInsp;
-        trackerRecords[existingIndex].rej += parsedRej;
-        trackerRecords[existingIndex].date = finalDate;
-        if (defect) trackerRecords[existingIndex].defect = defect; // Atualiza o defeito se um novo for digitado
+        trackerRecords[existingIndex].entries.unshift(newSubEntry);
+        trackerRecords[existingIndex].supplier = supplier;
         
-        // Coloca o registo atualizado no topo da tabela para visibilidade
         const updatedRecord = trackerRecords.splice(existingIndex, 1)[0];
         trackerRecords.unshift(updatedRecord);
+        
+        expandedRows.clear();
+        expandedRows.add(0);
     } else {
-        // Se for um Part Number novo, adiciona normalmente ao início
         trackerRecords.unshift({
             status: "🟢 ACTIVE",
-            date: finalDate,
             supplier: supplier,
             part: part,
-            defect: defect,
-            insp: parsedInsp,
-            rej: parsedRej
+            entries: [newSubEntry]
         });
+        expandedRows.clear();
     }
 
     saveTrackerData();
     updatePartsDropdown();
     renderTrackerTable();
 
-    // Limpar campos de entrada e rascunhos temporários
     document.getElementById('trackInspected').value = '';
     document.getElementById('trackRejected').value = '';
     document.getElementById('trackPart').value = '';
@@ -565,19 +691,51 @@ function addTrackerRecord() {
     document.getElementById('trackerBody').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-function askDeleteRecord(index) {
-    indexToUpdate = index;
+// LÓGICA DE MODAL E RELEÇÃO DE APAGAR
+function askDeleteMain(index, event) {
+    event.stopPropagation(); 
+    mainIndexToDelete = index;
+    subIndexToDelete = null; // null significa apagar o bloco todo
+    
+    document.getElementById('deleteModalTitle').textContent = 'Eliminar Part Number?';
+    document.getElementById('deleteModalText').textContent = `Tem a certeza que deseja remover o Part Number "${trackerRecords[index].part}" e TODO o seu histórico de sub-registos?`;
+    document.getElementById('deleteModal').style.display = 'flex';
+}
+
+function askDeleteSub(mainIndex, subIndex, event) {
+    event.stopPropagation();
+    mainIndexToDelete = mainIndex;
+    subIndexToDelete = subIndex;
+    
+    const entry = trackerRecords[mainIndex].entries[subIndex];
+    document.getElementById('deleteModalTitle').textContent = 'Eliminar Sub-registo?';
+    document.getElementById('deleteModalText').textContent = `Deseja remover apenas esta inspeção específica de data ${entry.date} (Insp: ${entry.insp} | Rej: ${entry.rej})?`;
     document.getElementById('deleteModal').style.display = 'flex';
 }
 
 function closeDeleteModal() {
     document.getElementById('deleteModal').style.display = 'none';
-    indexToUpdate = null;
+    mainIndexToDelete = null;
+    subIndexToDelete = null;
 }
 
 function executeDeleteRecord() {
-    if (indexToUpdate !== null) {
-        trackerRecords.splice(indexToUpdate, 1);
+    if (mainIndexToDelete !== null) {
+        if (subIndexToDelete === null) {
+            // Apagar linha principal inteira
+            trackerRecords.splice(mainIndexToDelete, 1);
+            expandedRows.delete(mainIndexToDelete);
+        } else {
+            // Apagar apenas o sub-registo selecionado
+            trackerRecords[mainIndexToDelete].entries.splice(subIndexToDelete, 1);
+            
+            // Se não sobrarem mais sub-registos, elimina a linha principal por completo
+            if (trackerRecords[mainIndexToDelete].entries.length === 0) {
+                trackerRecords.splice(mainIndexToDelete, 1);
+                expandedRows.delete(mainIndexToDelete);
+            }
+        }
+        
         saveTrackerData();
         updatePartsDropdown();
         renderTrackerTable();

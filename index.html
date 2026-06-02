@@ -148,7 +148,12 @@
     /* ESTILOS DO TRACKER */
     .btn-primary { width: 100%; margin-top: 16px; background: var(--accent2); color: white; padding: 16px; border: none; border-radius: var(--radius-sm); font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
     .btn-primary:active { background: #0369a1; }
-     
+    
+    .sync-container { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; background: var(--surface); padding: 10px 14px; border-radius: var(--radius-sm); border: 1px dashed var(--border); }
+    .sync-status { font-size: 0.75rem; color: var(--muted); font-family: var(--font-body); }
+    .btn-sync { background: var(--accent); color: white; padding: 6px 12px; border: none; border-radius: 4px; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
+    .btn-sync:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+
     .table-responsive { margin-top: 20px; overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); background: #fff; }
     table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; white-space: nowrap; }
     th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); }
@@ -171,9 +176,6 @@
     .tr-sub { background-color: #f8fafc; display: none; }
     .tr-sub td { padding: 8px 14px; border-bottom: 1px dashed var(--border); color: var(--muted); font-size: 0.8rem; }
     .sub-badge { background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 600; }
-
-    /* Configuração da URL da API de Sincronização */
-    .sync-status-indicator { font-size: 0.8rem; font-weight: 600; margin-top: 12px; display: none; padding: 8px; border-radius: var(--radius-sm); text-align: center; }
 
     /* MODAL DE CONFIRMAÇÃO */
     .modal-overlay {
@@ -215,11 +217,11 @@
 <body>
 
 <header>
-  <div class="version-badge">v2.3 — Cloud Sync</div>
+  <div class="version-badge">v2.2</div>
   <div class="logo-icon">🔬</div>
   <div class="header-text">
     <h1>AQL Inspector</h1>
-    <p>Calculadora de Inspeção & Tracker Cloud</p>
+    <p>Calculadora de Inspeção & Tracker Cloud Sync</p>
   </div>
 </header>
 
@@ -312,7 +314,11 @@
     </div>
     
     <button class="btn-primary" onclick="addTrackerRecord()">Registrar Controle</button>
-    <div id="syncStatus" class="sync-status-indicator"></div>
+
+    <div class="sync-container">
+        <div class="sync-status" id="syncStatus">Nuvem: Aguardando alterações...</div>
+        <button class="btn-sync" id="syncBtn" onclick="syncWithGoogleDrive()">Sincronizar Já</button>
+    </div>
 
     <div class="table-responsive">
         <table>
@@ -346,11 +352,13 @@
 </div>
 
 <script>
-// URL de Sincronização Fixa fornecida pelo utilizador
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyYmtOizE6OA-vlSDZjcMLkmHZfGXLIiC1RUp5L9s0/dev";
+// ==========================================
+// CONFIGURAÇÃO DO GOOGLE DRIVE (WEB APP URL)
+// ==========================================
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzuzAthdAi8Lp_ZZQi0kJ94HccE-IZTHANqbO_pKOJzj7_ghOYpJUmiAn3iBYIKb9Wr/exec";
 
 // ==========================================
-// CONFIGURAÇÃO AUTOMÁTICA DO PWA
+// CONFIGURAÇÃO AUTOMÁTICA DO PWA (Single File)
 // ==========================================
 (function setupPWA() {
   const iconUrl = "https://github.com/user-attachments/assets/78790071-93f2-4de7-8db4-dcb8cc28b45b";
@@ -358,7 +366,7 @@ const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyYmtOizE6OA-
   const manifestData = {
     "name": "AQL Inspector & Tracker Pro",
     "short_name": "AQL Inspector",
-    "description": "Calculadora AQL de Inspeção por Amostragem & Tracker",
+    "description": "Calculadora AQL de Inspeção por Amostragem & Tracker com Alta Capacidade",
     "start_url": window.location.href,
     "display": "standalone",
     "background_color": "#f1f5f9",
@@ -374,12 +382,18 @@ const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyYmtOizE6OA-
 
   if ('serviceWorker' in navigator) {
     const swCode = `
-      const CACHE_NAME = 'aql-tracker-single-cache-v6';
-      self.addEventListener('install', (e) => { self.skipWaiting(); });
-      self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });
+      const CACHE_NAME = 'aql-tracker-single-cache-v5';
+      self.addEventListener('install', (e) => {
+        self.skipWaiting();
+      });
+      self.addEventListener('activate', (e) => {
+        e.waitUntil(self.clients.claim());
+      });
       self.addEventListener('fetch', (e) => {
-        if (e.request.url.includes('script.google.com') || e.request.url.startsWith('blob:') || e.request.url.startsWith('chrome-extension:')) return;
-        e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+        if (e.request.url.startsWith('blob:') || e.request.url.startsWith('chrome-extension:')) return;
+        e.respondWith(
+          fetch(e.request).catch(() => caches.match(e.request))
+        );
       });
     `;
     const swBlob = new Blob([swCode], {type: 'application/javascript'});
@@ -387,8 +401,8 @@ const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyYmtOizE6OA-
     
     window.addEventListener('load', () => {
       navigator.serviceWorker.register(swUrl, { scope: './' })
-        .then(reg => console.log('PWA: Ativado!'))
-        .catch(err => console.error('PWA: Erro', err));
+        .then(reg => console.log('PWA: Ativado com Sucesso!'))
+        .catch(err => console.error('PWA: Erro de Ativação', err));
     });
   }
 })();
@@ -473,7 +487,7 @@ function calc() {
 }
 
 // ==========================================
-// ARMAZENAMENTO INDEXEDDB
+// ARMAZENAMENTO ILIMITADO COM INDEXEDDB + SYNC
 // ==========================================
 const DB_NAME = "AQLTrackerDB";
 const DB_VERSION = 1;
@@ -601,19 +615,7 @@ async function toggleStatus(index, event) {
         }
         await saveRecordToDB(trackerRecords[index]);
         renderTrackerTable();
-        
-        if(trackerRecords[index].entries.length > 0) {
-            const lastEntry = trackerRecords[index].entries[0];
-            sendDataToGoogleDrive(
-                trackerRecords[index].status,
-                lastEntry.date,
-                trackerRecords[index].part,
-                trackerRecords[index].supplier,
-                lastEntry.defect,
-                lastEntry.insp,
-                lastEntry.rej
-            );
-        }
+        autoSync();
     }
 }
 
@@ -709,11 +711,8 @@ async function addTrackerRecord() {
 
     const newSubEntry = { date: finalDate, defect: defect, insp: parsedInsp, rej: parsedRej };
     const existingIndex = trackerRecords.findIndex(rec => rec.part.toUpperCase() === part.toUpperCase());
-    
-    let currentStatus = "🟢 ACTIVE";
 
     if (existingIndex !== -1) {
-        currentStatus = trackerRecords[existingIndex].status;
         trackerRecords[existingIndex].entries.unshift(newSubEntry);
         trackerRecords[existingIndex].supplier = supplier;
         const updatedRecord = trackerRecords.splice(existingIndex, 1)[0];
@@ -721,7 +720,7 @@ async function addTrackerRecord() {
         await saveRecordToDB(updatedRecord);
         expandedRows.clear(); expandedRows.add(0);
     } else {
-        const newRecord = { status: currentStatus, supplier: supplier, part: part, entries: [newSubEntry] };
+        const newRecord = { status: "🟢 ACTIVE", supplier: supplier, part: part, entries: [newSubEntry] };
         trackerRecords.unshift(newRecord);
         await saveRecordToDB(newRecord);
         expandedRows.clear();
@@ -729,9 +728,6 @@ async function addTrackerRecord() {
 
     updatePartsDropdown();
     renderTrackerTable();
-    
-    // Executa a Sincronização direta com o Google Drive (Google Sheets)
-    sendDataToGoogleDrive(currentStatus, finalDate, part, supplier, defect, parsedInsp, parsedRej);
 
     document.getElementById('trackInspected').value = '';
     document.getElementById('trackRejected').value = '';
@@ -741,54 +737,8 @@ async function addTrackerRecord() {
     
     ['draftPart', 'draftSupplier', 'draftDefect'].forEach(key => localStorage.removeItem(key));
     document.getElementById('trackerBody').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-// ==========================================
-// FUNÇÃO DE SINCRO DIRETA GOOGLE DRIVE
-// ==========================================
-function sendDataToGoogleDrive(status, date, part, supplier, defect, insp, rej) {
-    const indicator = document.getElementById('syncStatus');
     
-    indicator.style.display = 'block';
-    indicator.style.background = '#fef3c7';
-    indicator.style.color = 'var(--warn)';
-    indicator.style.border = '1px solid #fde68a';
-    indicator.textContent = '🔄 A sincronizar com o Google Drive...';
-
-    // Formata os parâmetros para envio x-www-form-urlencoded
-    const formData = new URLSearchParams();
-    formData.append('status', status);
-    formData.append('date', date);
-    formData.append('part', part);
-    formData.append('supplier', supplier);
-    formData.append('defect', defect || '-');
-    formData.append('insp', insp);
-    formData.append('rej', rej);
-
-    fetch(GOOGLE_SCRIPT_URL, {
-        method: 'POST',
-        body: formData,
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    })
-    .then(response => {
-        if (response.ok) {
-            indicator.style.background = '#dcfce7';
-            indicator.style.color = 'var(--accent)';
-            indicator.style.border = '1px solid #a7f3d0';
-            indicator.textContent = '☁️ Sincronizado com sucesso com o Google Drive!';
-            setTimeout(() => { indicator.style.display = 'none'; }, 3500);
-        } else {
-            throw new Error('Erro na resposta do servidor.');
-        }
-    })
-    .catch(error => {
-        console.error('Erro na sincronização Cloud:', error);
-        indicator.style.background = '#fee2e2';
-        indicator.style.color = 'var(--danger)';
-        indicator.style.border = '1px solid #fecaca';
-        indicator.textContent = '❌ Falha na Sincronização Cloud. Se estiver em modo /dev, certifique-se de que fez login na Google.';
-        setTimeout(() => { indicator.style.display = 'none'; }, 6000);
-    });
+    autoSync();
 }
 
 function askDeleteMain(index, event) {
@@ -831,6 +781,64 @@ async function executeDeleteRecord() {
         updatePartsDropdown();
         renderTrackerTable();
         closeDeleteModal();
+        autoSync();
+    }
+}
+
+// ==========================================
+// FUNÇÕES DE COMUNICAÇÃO CLOUD SYNC
+// ==========================================
+let syncTimeout = null;
+
+function autoSync() {
+    const statusEl = document.getElementById('syncStatus');
+    statusEl.textContent = "Nuvem: Alterações pendentes...";
+    if (syncTimeout) clearTimeout(syncTimeout);
+    // Dispara a sincronização automática após 2 segundos de inatividade de ações
+    syncTimeout = setTimeout(syncWithGoogleDrive, 2000);
+}
+
+async function syncWithGoogleDrive() {
+    const statusEl = document.getElementById('syncStatus');
+    const syncBtn = document.getElementById('syncBtn');
+    
+    if (SCRIPT_URL === "COLE_AQUI_O_URL_DO_SEU_APPS_SCRIPT") {
+        statusEl.textContent = "Nuvem: Erro URL de sincronização ausente.";
+        return;
+    }
+
+    statusEl.textContent = "Nuvem: Sincronizando dados...";
+    syncBtn.disabled = true;
+
+    try {
+        const payload = {
+            action: "syncAll",
+            records: trackerRecords
+        };
+
+        // Envio via fetch (método POST com tratamento de redirecionamento nativo do Apps Script)
+        const response = await fetch(SCRIPT_URL, {
+            method: "POST",
+            mode: "cors",
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const resData = await response.json();
+        if (resData.success) {
+            const timeStr = new Date().toLocaleTimeString();
+            statusEl.textContent = `Nuvem: Sincronizado às ${timeStr}`;
+        } else {
+            statusEl.textContent = "Nuvem: Falha ao processar.";
+            console.error(resData.error);
+        }
+    } catch (error) {
+        statusEl.textContent = "Nuvem: Erro de ligação.";
+        console.error(error);
+    } finally {
+        syncBtn.disabled = false;
     }
 }
 

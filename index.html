@@ -212,7 +212,7 @@
 <body>
 
 <header>
-  <div class="version-badge">v3.0</div>
+  <div class="version-badge">v3.1</div>
   <div class="logo-icon">🔬</div>
   <div class="header-text">
     <h1>AQL Inspector</h1>
@@ -348,7 +348,6 @@
 (function setupPWA() {
   const iconUrl = "https://github.com/user-attachments/assets/78790071-93f2-4de7-8db4-dcb8cc28b45b";
   
-  // 1. Injetar Manifesto Dinamicamente via Blob URL
   const manifestData = {
     "name": "AQL Inspector & Tracker Pro",
     "short_name": "AQL Inspector",
@@ -366,7 +365,6 @@
   const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
   document.getElementById('pwa-manifest').setAttribute('href', URL.createObjectURL(manifestBlob));
 
-  // 2. Criar e Registrar o Service Worker Dinamicamente
   if ('serviceWorker' in navigator) {
     const swCode = `
       const CACHE_NAME = 'aql-tracker-single-cache-v5';
@@ -681,11 +679,11 @@ function renderTrackerTable() {
     });
 }
 
-// Função para sincronizar dados exclusivamente do Tracker com o Google Drive
+// Função dedicada que envia estritamente os dados do Incoming Control Tracker para o Apps Script
 async function syncToGoogleDrive(status, part, supplier, date, defect, inspected, rejected) {
     if (!WEBHOOK_URL) return;
     
-    // Apenas os dados estritos do Incoming Control Tracker são mapeados aqui
+    // Configuração estrita do payload (NENHUM valor da calculadora de AQL/FMEA é injetado ou transmitido aqui)
     const payload = {
         status: status,
         partNumber: part,
@@ -699,13 +697,13 @@ async function syncToGoogleDrive(status, part, supplier, date, defect, inspected
     try {
         await fetch(WEBHOOK_URL, {
             method: 'POST',
-            mode: 'no-cors', // Evita erros de política CORS nos redirects do Apps Script
+            mode: 'no-cors', 
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
-        console.log("Sincronização com o Google Drive concluída.");
+        console.log("Sincronização estrita do Tracker enviada com sucesso.");
     } catch (error) {
-        console.error("Erro ao sincronizar com o Google Drive:", error);
+        console.error("Erro na sincronização em background:", error);
     }
 }
 
@@ -746,7 +744,7 @@ async function addTrackerRecord() {
         expandedRows.clear();
     }
 
-    // Dispara a sincronização automática em background sem enviar os dados do FMEA/AQL
+    // Executa a transmissão apenas com as variáveis nativas do Tracker
     syncToGoogleDrive(currentStatus, part, supplier, finalDate, defect, parsedInsp, parsedRej);
 
     updatePartsDropdown();
@@ -805,7 +803,6 @@ async function executeDeleteRecord() {
     }
 }
 
-// Inicialização Global
 window.addEventListener('DOMContentLoaded', () => {
   renderDots('sev', stepperState.sev);
   renderDots('occ', stepperState.occ);

@@ -313,7 +313,7 @@
     </div>
     
     <button class="btn-primary" onclick="addTrackerRecord()">Registrar Controle Local</button>
-    <button class="btn-drive" id="btnSendDrive" onclick="sendToGoogleDrive()">📁 Enviar Valores Atuais para o Drive</button>
+    <button class="btn-drive" id="btnSendDrive" onclick="sendToGoogleDrive()">📁 Exportar para Google Drive</button>
 
     <div class="table-responsive">
         <table>
@@ -495,7 +495,7 @@ async function sendToGoogleDrive() {
   }
 
   // URL obtido na implementação do Google Apps Script
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbze1B96QIfC3K9zJVGqA58tlym7NGYEKY_d6I7P0IUlZyx5bJdkKyRUlozFgKONwrp17A/exec";
+  const SCRIPT_URL = "COLE_AQUI_O_URL_DO_SEU_APPS_SCRIPT";
 
   if (SCRIPT_URL === "COLE_AQUI_O_URL_DO_SEU_APPS_SCRIPT") {
     alert("Por favor, cole o URL gerado pelo seu Google Apps Script no código HTML antes de enviar.");
@@ -504,9 +504,9 @@ async function sendToGoogleDrive() {
 
   const btn = document.getElementById('btnSendDrive');
   btn.disabled = true;
-  btn.textContent = "⏳ A enviar dados para o Drive...";
+  btn.textContent = "⏳ A exportar dados...";
 
-  // Agregar parâmetros atuais de FMEA e Cálculos do Lote ativos na tela
+  // Agregar parâmetros atuais de FMEA e Cálculos do Lote ativos no ecrã
   const payload = {
     sev: stepperState.sev,
     occ: stepperState.occ,
@@ -526,14 +526,14 @@ async function sendToGoogleDrive() {
 
   try {
     // Envio cross-origin utilizando text/plain para evitar pré-voo de CORS restritivo do Apps Script
-    const response = await fetch(SCRIPT_URL, {
+    await fetch(SCRIPT_URL, {
       method: "POST",
       mode: "no-cors", 
       headers: { "Content-Type": "text/plain" },
       body: JSON.stringify(payload)
     });
 
-    alert("✅ Dados enviados com sucesso! Verifique a sua folha no Google Drive.");
+    alert("✅ Dados exportados com sucesso para o Google Drive!");
     
     // Limpar os campos do tracker após envio bem-sucedido
     document.getElementById('trackInspected').value = '';
@@ -548,7 +548,7 @@ async function sendToGoogleDrive() {
     alert("❌ Erro de comunicação ao tentar sincronizar com o Google Drive.");
   } finally {
     btn.disabled = false;
-    btn.textContent = "📁 Enviar Valores Atuais para o Drive";
+    btn.textContent = "📁 Exportar para Google Drive";
   }
 }
 

@@ -313,7 +313,7 @@
     </div>
     
     <button class="btn-primary" onclick="addTrackerRecord()">Registrar Controle Local</button>
-    <button class="btn-drive" id="btnSendDrive" onclick="sendToGoogleDrive()">📁 Exportar para Google Drive</button>
+    <button class="btn-drive" id="btnSendDrive" onclick="sendToGoogleDrive()">📁 Enviar Valores Atuais para o Drive</button>
 
     <div class="table-responsive">
         <table>
@@ -504,9 +504,9 @@ async function sendToGoogleDrive() {
 
   const btn = document.getElementById('btnSendDrive');
   btn.disabled = true;
-  btn.textContent = "⏳ A exportar dados...";
+  btn.textContent = "⏳ A enviar dados para o Drive...";
 
-  // Agregar parâmetros atuais de FMEA e Cálculos do Lote ativos no ecrã
+  // Agregar parâmetros atuais de FMEA e Cálculos do Lote ativos na tela
   const payload = {
     sev: stepperState.sev,
     occ: stepperState.occ,
@@ -526,14 +526,14 @@ async function sendToGoogleDrive() {
 
   try {
     // Envio cross-origin utilizando text/plain para evitar pré-voo de CORS restritivo do Apps Script
-    await fetch(SCRIPT_URL, {
+    const response = await fetch(SCRIPT_URL, {
       method: "POST",
       mode: "no-cors", 
       headers: { "Content-Type": "text/plain" },
       body: JSON.stringify(payload)
     });
 
-    alert("✅ Dados exportados com sucesso para o Google Drive!");
+    alert("✅ Dados enviados com sucesso! Verifique a sua folha no Google Drive.");
     
     // Limpar os campos do tracker após envio bem-sucedido
     document.getElementById('trackInspected').value = '';
@@ -548,7 +548,7 @@ async function sendToGoogleDrive() {
     alert("❌ Erro de comunicação ao tentar sincronizar com o Google Drive.");
   } finally {
     btn.disabled = false;
-    btn.textContent = "📁 Exportar para Google Drive";
+    btn.textContent = "📁 Enviar Valores Atuais para o Drive";
   }
 }
 

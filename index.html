@@ -172,6 +172,9 @@
     .tr-sub td { padding: 8px 14px; border-bottom: 1px dashed var(--border); color: var(--muted); font-size: 0.8rem; }
     .sub-badge { background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 600; }
 
+    /* Configuração da URL da API de Sincronização */
+    .sync-status-indicator { font-size: 0.8rem; font-weight: 600; margin-top: 12px; display: none; padding: 8px; border-radius: var(--radius-sm); text-align: center; }
+
     /* MODAL DE CONFIRMAÇÃO */
     .modal-overlay {
       position: fixed;
@@ -212,11 +215,11 @@
 <body>
 
 <header>
-  <div class="version-badge">v3.1</div>
+  <div class="version-badge">v2.3 — Cloud Sync</div>
   <div class="logo-icon">🔬</div>
   <div class="header-text">
     <h1>AQL Inspector</h1>
-    <p>Calculadora de Inspeção & Tracker</p>
+    <p>Calculadora de Inspeção & Tracker Cloud</p>
   </div>
 </header>
 
@@ -309,6 +312,7 @@
     </div>
     
     <button class="btn-primary" onclick="addTrackerRecord()">Registrar Controle</button>
+    <div id="syncStatus" class="sync-status-indicator"></div>
 
     <div class="table-responsive">
         <table>
@@ -342,8 +346,11 @@
 </div>
 
 <script>
+// URL de Sincronização Fixa fornecida pelo utilizador
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyYmtOizE6OA-vlSDZjcMLkmHZfGXLIiC1RUp5L9s0/dev";
+
 // ==========================================
-// CONFIGURAÇÃO AUTOMÁTICA DO PWA (Single File)
+// CONFIGURAÇÃO AUTOMÁTICA DO PWA
 // ==========================================
 (function setupPWA() {
   const iconUrl = "https://github.com/user-attachments/assets/78790071-93f2-4de7-8db4-dcb8cc28b45b";
@@ -351,7 +358,7 @@
   const manifestData = {
     "name": "AQL Inspector & Tracker Pro",
     "short_name": "AQL Inspector",
-    "description": "Calculadora AQL de Inspeção por Amostragem & Tracker com Alta Capacidade",
+    "description": "Calculadora AQL de Inspeção por Amostragem & Tracker",
     "start_url": window.location.href,
     "display": "standalone",
     "background_color": "#f1f5f9",
@@ -367,18 +374,12 @@
 
   if ('serviceWorker' in navigator) {
     const swCode = `
-      const CACHE_NAME = 'aql-tracker-single-cache-v5';
-      self.addEventListener('install', (e) => {
-        self.skipWaiting();
-      });
-      self.addEventListener('activate', (e) => {
-        e.waitUntil(self.clients.claim());
-      });
+      const CACHE_NAME = 'aql-tracker-single-cache-v6';
+      self.addEventListener('install', (e) => { self.skipWaiting(); });
+      self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });
       self.addEventListener('fetch', (e) => {
-        if (e.request.url.startsWith('blob:') || e.request.url.startsWith('chrome-extension:')) return;
-        e.respondWith(
-          fetch(e.request).catch(() => caches.match(e.request))
-        );
+        if (e.request.url.includes('script.google.com') || e.request.url.startsWith('blob:') || e.request.url.startsWith('chrome-extension:')) return;
+        e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
       });
     `;
     const swBlob = new Blob([swCode], {type: 'application/javascript'});
@@ -386,8 +387,8 @@
     
     window.addEventListener('load', () => {
       navigator.serviceWorker.register(swUrl, { scope: './' })
-        .then(reg => console.log('PWA: Ativado com Sucesso!'))
-        .catch(err => console.error('PWA: Erro de Ativação', err));
+        .then(reg => console.log('PWA: Ativado!'))
+        .catch(err => console.error('PWA: Erro', err));
     });
   }
 })();
@@ -472,15 +473,12 @@ function calc() {
 }
 
 // ==========================================
-// ARMAZENAMENTO ILIMITADO COM INDEXEDDB
+// ARMAZENAMENTO INDEXEDDB
 // ==========================================
 const DB_NAME = "AQLTrackerDB";
 const DB_VERSION = 1;
 const STORE_NAME = "trackerRecords";
 let db = null;
-
-// URL do Google Apps Script fornecido para sincronização
-const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbze1B96QIfC3K9zJVGqA58tlym7NGYEKY_d6I7P0IUlZyx5bJdkKyRUlozFgKONwrp17A/exec";
 
 let trackerRecords = [];
 let mainIndexToDelete = null;
@@ -603,6 +601,19 @@ async function toggleStatus(index, event) {
         }
         await saveRecordToDB(trackerRecords[index]);
         renderTrackerTable();
+        
+        if(trackerRecords[index].entries.length > 0) {
+            const lastEntry = trackerRecords[index].entries[0];
+            sendDataToGoogleDrive(
+                trackerRecords[index].status,
+                lastEntry.date,
+                trackerRecords[index].part,
+                trackerRecords[index].supplier,
+                lastEntry.defect,
+                lastEntry.insp,
+                lastEntry.rej
+            );
+        }
     }
 }
 
@@ -679,34 +690,6 @@ function renderTrackerTable() {
     });
 }
 
-// Função dedicada que envia estritamente os dados do Incoming Control Tracker para o Apps Script
-async function syncToGoogleDrive(status, part, supplier, date, defect, inspected, rejected) {
-    if (!WEBHOOK_URL) return;
-    
-    // Configuração estrita do payload (NENHUM valor da calculadora de AQL/FMEA é injetado ou transmitido aqui)
-    const payload = {
-        status: status,
-        partNumber: part,
-        supplier: supplier,
-        date: date,
-        defect: defect || "Nenhum",
-        inspectedQuantity: parseInt(inspected) || 0,
-        rejectedQuantity: parseInt(rejected) || 0
-    };
-
-    try {
-        await fetch(WEBHOOK_URL, {
-            method: 'POST',
-            mode: 'no-cors', 
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        console.log("Sincronização estrita do Tracker enviada com sucesso.");
-    } catch (error) {
-        console.error("Erro na sincronização em background:", error);
-    }
-}
-
 async function addTrackerRecord() {
     const supplier = document.getElementById('trackSupplier').value.trim();
     const part = document.getElementById('trackPart').value.trim();
@@ -726,7 +709,7 @@ async function addTrackerRecord() {
 
     const newSubEntry = { date: finalDate, defect: defect, insp: parsedInsp, rej: parsedRej };
     const existingIndex = trackerRecords.findIndex(rec => rec.part.toUpperCase() === part.toUpperCase());
-
+    
     let currentStatus = "🟢 ACTIVE";
 
     if (existingIndex !== -1) {
@@ -738,17 +721,17 @@ async function addTrackerRecord() {
         await saveRecordToDB(updatedRecord);
         expandedRows.clear(); expandedRows.add(0);
     } else {
-        const newRecord = { status: "🟢 ACTIVE", supplier: supplier, part: part, entries: [newSubEntry] };
+        const newRecord = { status: currentStatus, supplier: supplier, part: part, entries: [newSubEntry] };
         trackerRecords.unshift(newRecord);
         await saveRecordToDB(newRecord);
         expandedRows.clear();
     }
 
-    // Executa a transmissão apenas com as variáveis nativas do Tracker
-    syncToGoogleDrive(currentStatus, part, supplier, finalDate, defect, parsedInsp, parsedRej);
-
     updatePartsDropdown();
     renderTrackerTable();
+    
+    // Executa a Sincronização direta com o Google Drive (Google Sheets)
+    sendDataToGoogleDrive(currentStatus, finalDate, part, supplier, defect, parsedInsp, parsedRej);
 
     document.getElementById('trackInspected').value = '';
     document.getElementById('trackRejected').value = '';
@@ -758,6 +741,54 @@ async function addTrackerRecord() {
     
     ['draftPart', 'draftSupplier', 'draftDefect'].forEach(key => localStorage.removeItem(key));
     document.getElementById('trackerBody').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ==========================================
+// FUNÇÃO DE SINCRO DIRETA GOOGLE DRIVE
+// ==========================================
+function sendDataToGoogleDrive(status, date, part, supplier, defect, insp, rej) {
+    const indicator = document.getElementById('syncStatus');
+    
+    indicator.style.display = 'block';
+    indicator.style.background = '#fef3c7';
+    indicator.style.color = 'var(--warn)';
+    indicator.style.border = '1px solid #fde68a';
+    indicator.textContent = '🔄 A sincronizar com o Google Drive...';
+
+    // Formata os parâmetros para envio x-www-form-urlencoded
+    const formData = new URLSearchParams();
+    formData.append('status', status);
+    formData.append('date', date);
+    formData.append('part', part);
+    formData.append('supplier', supplier);
+    formData.append('defect', defect || '-');
+    formData.append('insp', insp);
+    formData.append('rej', rej);
+
+    fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        body: formData,
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    })
+    .then(response => {
+        if (response.ok) {
+            indicator.style.background = '#dcfce7';
+            indicator.style.color = 'var(--accent)';
+            indicator.style.border = '1px solid #a7f3d0';
+            indicator.textContent = '☁️ Sincronizado com sucesso com o Google Drive!';
+            setTimeout(() => { indicator.style.display = 'none'; }, 3500);
+        } else {
+            throw new Error('Erro na resposta do servidor.');
+        }
+    })
+    .catch(error => {
+        console.error('Erro na sincronização Cloud:', error);
+        indicator.style.background = '#fee2e2';
+        indicator.style.color = 'var(--danger)';
+        indicator.style.border = '1px solid #fecaca';
+        indicator.textContent = '❌ Falha na Sincronização Cloud. Se estiver em modo /dev, certifique-se de que fez login na Google.';
+        setTimeout(() => { indicator.style.display = 'none'; }, 6000);
+    });
 }
 
 function askDeleteMain(index, event) {
@@ -803,6 +834,7 @@ async function executeDeleteRecord() {
     }
 }
 
+// Inicialização Global
 window.addEventListener('DOMContentLoaded', () => {
   renderDots('sev', stepperState.sev);
   renderDots('occ', stepperState.occ);

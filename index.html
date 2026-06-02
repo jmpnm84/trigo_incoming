@@ -217,7 +217,7 @@
 <body>
 
 <header>
-  <div class="version-badge">v2.2</div>
+  <div class="version-badge">v3.0</div>
   <div class="logo-icon">🔬</div>
   <div class="header-text">
     <h1>AQL Inspector</h1>
@@ -550,13 +550,8 @@ async function loadTrackerData() {
         if (savedRecords && savedRecords.length > 0) {
             trackerRecords = savedRecords;
         } else {
-            const defaultRecords = [
-                { status: "🟢 ACTIVE", supplier: "YAZAKI SYSTEMS TECHNOLOGIES FRANCE", part: "290Y16052R", entries: [{ date: "2026-05-05", defect: "Broken Pin", insp: 120, rej: 0 }] },
-                { status: "🟢 ACTIVE", supplier: "UNITED SPRINGS SAS", part: "82003262249", entries: [{ date: "2026-05-05", defect: "Deformated Spring", insp: 480, rej: 0 }] },
-                { status: "🟢 ACTIVE", supplier: "BONTAZ CENTRE MAROC", part: "152415573R", entries: [{ date: "2026-05-05", defect: "Conductivity Variation", insp: 240, rej: 0 }] }
-            ];
-            for (const rec of defaultRecords) { await saveRecordToDB(rec); }
-            trackerRecords = defaultRecords;
+            // Valores default em código removidos para iniciar vazio caso o IndexedDB não tenha dados criados.
+            trackerRecords = [];
         }
     } catch (err) { console.error(err); }
 

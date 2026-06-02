@@ -377,7 +377,6 @@
         e.waitUntil(self.clients.claim());
       });
       self.addEventListener('fetch', (e) => {
-        // Ignora requisições locais geradas dinamicamente e foca no tráfego de rede padrão
         if (e.request.url.startsWith('blob:') || e.request.url.startsWith('chrome-extension:')) return;
         e.respondWith(
           fetch(e.request).catch(() => caches.match(e.request))
@@ -475,14 +474,14 @@ function calc() {
 }
 
 // ==========================================
-// ARMAZENAMENTO ILIMITADO COM INDEXEDDB E SYNC GOOGLE DRIVE
+// ARMAZENAMENTO ILIMITADO COM INDEXEDDB
 // ==========================================
 const DB_NAME = "AQLTrackerDB";
 const DB_VERSION = 1;
 const STORE_NAME = "trackerRecords";
 let db = null;
 
-// Endpoint do Google Apps Script fornecido pelo utilizador
+// URL do Google Apps Script fornecido para sincronização
 const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbze1B96QIfC3K9zJVGqA58tlym7NGYEKY_d6I7P0IUlZyx5bJdkKyRUlozFgKONwrp17A/exec";
 
 let trackerRecords = [];
@@ -682,32 +681,32 @@ function renderTrackerTable() {
     });
 }
 
-// Nova função para sincronizar dados em background com o Drive via Macro URL
-function syncToGoogleDrive(record, entry) {
-    if (!WEBHOOK_URL || WEBHOOK_URL.includes("SEU_URL_AQUI")) return;
-
+// Função para sincronizar dados exclusivamente do Tracker com o Google Drive
+async function syncToGoogleDrive(status, part, supplier, date, defect, inspected, rejected) {
+    if (!WEBHOOK_URL) return;
+    
+    // Apenas os dados estritos do Incoming Control Tracker são mapeados aqui
     const payload = {
-        status: record.status,
-        part: record.part,
-        supplier: record.supplier,
-        date: entry.date,
-        defect: entry.defect,
-        inspected: entry.insp,
-        rejected: entry.rej,
-        timestamp: new Date().toISOString()
+        status: status,
+        partNumber: part,
+        supplier: supplier,
+        date: date,
+        defect: defect || "Nenhum",
+        inspectedQuantity: parseInt(inspected) || 0,
+        rejectedQuantity: parseInt(rejected) || 0
     };
 
-    // Usando JSONP ou POST simples dependendo da infraestrutura padrão do Apps Script
-    fetch(WEBHOOK_URL, {
-        method: 'POST',
-        mode: 'no-cors', // Evita problemas de CORS comuns com o redirecionamento de macros do Google
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-    })
-    .then(() => console.log('Sincronização enviada para o Google Drive com sucesso.'))
-    .catch(err => console.error('Erro na sincronização em background:', err));
+    try {
+        await fetch(WEBHOOK_URL, {
+            method: 'POST',
+            mode: 'no-cors', // Evita erros de política CORS nos redirects do Apps Script
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        console.log("Sincronização com o Google Drive concluída.");
+    } catch (error) {
+        console.error("Erro ao sincronizar com o Google Drive:", error);
+    }
 }
 
 async function addTrackerRecord() {
@@ -730,28 +729,25 @@ async function addTrackerRecord() {
     const newSubEntry = { date: finalDate, defect: defect, insp: parsedInsp, rej: parsedRej };
     const existingIndex = trackerRecords.findIndex(rec => rec.part.toUpperCase() === part.toUpperCase());
 
-    let recordToSync = null;
+    let currentStatus = "🟢 ACTIVE";
 
     if (existingIndex !== -1) {
+        currentStatus = trackerRecords[existingIndex].status;
         trackerRecords[existingIndex].entries.unshift(newSubEntry);
         trackerRecords[existingIndex].supplier = supplier;
         const updatedRecord = trackerRecords.splice(existingIndex, 1)[0];
         trackerRecords.unshift(updatedRecord);
         await saveRecordToDB(updatedRecord);
-        recordToSync = updatedRecord;
         expandedRows.clear(); expandedRows.add(0);
     } else {
         const newRecord = { status: "🟢 ACTIVE", supplier: supplier, part: part, entries: [newSubEntry] };
         trackerRecords.unshift(newRecord);
         await saveRecordToDB(newRecord);
-        recordToSync = newRecord;
         expandedRows.clear();
     }
 
-    // Executa a sincronização silenciosa para não prender a interface se a rede estiver lenta
-    if (recordToSync) {
-        syncToGoogleDrive(recordToSync, newSubEntry);
-    }
+    // Dispara a sincronização automática em background sem enviar os dados do FMEA/AQL
+    syncToGoogleDrive(currentStatus, part, supplier, finalDate, defect, parsedInsp, parsedRej);
 
     updatePartsDropdown();
     renderTrackerTable();

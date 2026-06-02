@@ -148,6 +148,10 @@
     /* ESTILOS DO TRACKER */
     .btn-primary { width: 100%; margin-top: 16px; background: var(--accent2); color: white; padding: 16px; border: none; border-radius: var(--radius-sm); font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
     .btn-primary:active { background: #0369a1; }
+    
+    .btn-drive { width: 100%; margin-top: 8px; background: var(--accent); color: white; padding: 16px; border: none; border-radius: var(--radius-sm); font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-drive:active { background: #047857; }
+    .btn-drive:disabled { background: var(--muted); opacity: 0.6; cursor: not-allowed; }
      
     .table-responsive { margin-top: 20px; overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); background: #fff; }
     table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; white-space: nowrap; }
@@ -212,7 +216,7 @@
 <body>
 
 <header>
-  <div class="version-badge">v2.1</div>
+  <div class="version-badge">v2.2</div>
   <div class="logo-icon">🔬</div>
   <div class="header-text">
     <h1>AQL Inspector</h1>
@@ -308,7 +312,8 @@
         </div>
     </div>
     
-    <button class="btn-primary" onclick="addTrackerRecord()">Registrar Controle</button>
+    <button class="btn-primary" onclick="addTrackerRecord()">Registrar Controle Local</button>
+    <button class="btn-drive" id="btnSendDrive" onclick="sendToGoogleDrive()">📁 Enviar Valores Atuais para o Drive</button>
 
     <div class="table-responsive">
         <table>
@@ -377,7 +382,6 @@
         e.waitUntil(self.clients.claim());
       });
       self.addEventListener('fetch', (e) => {
-        // Ignora requisições locais geradas dinamicamente e foca no tráfego de rede padrão
         if (e.request.url.startsWith('blob:') || e.request.url.startsWith('chrome-extension:')) return;
         e.respondWith(
           fetch(e.request).catch(() => caches.match(e.request))
@@ -472,6 +476,80 @@ function calc() {
   document.getElementById('mAQL').textContent = cat !== 'A' ? aql : '—';
   document.getElementById('mSample').textContent = cat !== 'A' ? sample : '—';
   document.getElementById('mAc').textContent = cat !== 'A' ? ac : '—';
+}
+
+// ==========================================
+// INTEGRAÇÃO COM GOOGLE DRIVE (Apps Script)
+// ==========================================
+async function sendToGoogleDrive() {
+  const supplier = document.getElementById('trackSupplier').value.trim();
+  const part = document.getElementById('trackPart').value.trim();
+  const defect = document.getElementById('trackDefect').value.trim();
+  const insp = document.getElementById('trackInspected').value;
+  const rej = document.getElementById('trackRejected').value;
+  const dateStr = document.getElementById('trackDate').value;
+
+  if (!supplier || !part || !insp) {
+    alert('Por favor, introduza pelo menos o Part Number, Fornecedor e Qtd. Inspecionada para enviar para o Drive.');
+    return;
+  }
+
+  // URL obtido na implementação do Google Apps Script
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbze1B96QIfC3K9zJVGqA58tlym7NGYEKY_d6I7P0IUlZyx5bJdkKyRUlozFgKONwrp17A/exec";
+
+  if (SCRIPT_URL === "COLE_AQUI_O_URL_DO_SEU_APPS_SCRIPT") {
+    alert("Por favor, cole o URL gerado pelo seu Google Apps Script no código HTML antes de enviar.");
+    return;
+  }
+
+  const btn = document.getElementById('btnSendDrive');
+  btn.disabled = true;
+  btn.textContent = "⏳ A enviar dados para o Drive...";
+
+  // Agregar parâmetros atuais de FMEA e Cálculos do Lote ativos na tela
+  const payload = {
+    sev: stepperState.sev,
+    occ: stepperState.occ,
+    det: stepperState.det,
+    lotSize: document.getElementById('lotSize').value || 0,
+    history: document.getElementById('history').value,
+    aql: document.getElementById('mAQL').textContent,
+    sample: document.getElementById('mSample').textContent,
+    ac: document.getElementById('mAc').textContent,
+    part: part,
+    supplier: supplier,
+    defect: defect || '-',
+    inspected: parseInt(insp) || 0,
+    rejected: parseInt(rej) || 0,
+    date: dateStr || new Date().toISOString().split('T')[0]
+  };
+
+  try {
+    // Envio cross-origin utilizando text/plain para evitar pré-voo de CORS restritivo do Apps Script
+    const response = await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors", 
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify(payload)
+    });
+
+    alert("✅ Dados enviados com sucesso! Verifique a sua folha no Google Drive.");
+    
+    // Limpar os campos do tracker após envio bem-sucedido
+    document.getElementById('trackInspected').value = '';
+    document.getElementById('trackRejected').value = '';
+    document.getElementById('trackPart').value = '';
+    document.getElementById('trackSupplier').value = '';
+    document.getElementById('trackDefect').value = '';
+    ['draftPart', 'draftSupplier', 'draftDefect'].forEach(key => localStorage.removeItem(key));
+
+  } catch (error) {
+    console.error("Erro ao enviar para o Drive:", error);
+    alert("❌ Erro de comunicação ao tentar sincronizar com o Google Drive.");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "📁 Enviar Valores Atuais para o Drive";
+  }
 }
 
 // ==========================================

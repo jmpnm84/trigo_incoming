@@ -804,28 +804,48 @@ async function syncWithGoogleDrive() {
     syncBtn.disabled = true;
 
     try {
-        const payload = {
-            action: "syncAll",
-            records: trackerRecords
-        };
+        // Envia sequencialmente cada sub-registo/inspeção para alinhar com o teu novo script do Google Apps Script
+        let lastSuccess = true;
+        
+        for (const mainRec of trackerRecords) {
+            for (const entry of mainRec.entries) {
+                // Monta o payload exatamente com os nomes de variáveis que o teu código gs do Apps Script espera
+                const payload = {
+                    id: mainRec.status,            // Guardado na coluna id / Data provisória
+                    data: entry.date,              // Coluna 'Data'
+                    missao: mainRec.supplier,      // Coluna 'Missão / Lote' (usando Fornecedor)
+                    ref: mainRec.part,             // Coluna 'Referência Peça' (Part Number)
+                    tipo: entry.defect || "OK",    // Coluna 'Tipo' (Defeito)
+                    qtd: entry.insp,               // Coluna 'Quantidade' (Quantidade Inspecionada)
+                    resp: "AQL Inspector App",     // Coluna 'Responsável'
+                    dm: [ `Rejeitados: ${entry.rej}` ] // Coluna 'Códigos Data Matrix' adaptado para registar a rejeição
+                };
 
-        const response = await fetch(SCRIPT_URL, {
-            method: "POST",
-            mode: "cors",
-            redirect: "follow",
-            headers: {
-                "Content-Type": "text/plain;charset=utf-8"
-            },
-            body: JSON.stringify(payload)
-        });
+                const response = await fetch(SCRIPT_URL, {
+                    method: "POST",
+                    mode: "cors",
+                    redirect: "follow",
+                    headers: {
+                        "Content-Type": "text/plain;charset=utf-8"
+                    },
+                    body: JSON.stringify(payload)
+                });
 
-        const resData = await response.json();
-        if (resData.success) {
+                const resData = await response.json();
+                if (resData.status !== "success") {
+                    lastSuccess = false;
+                    console.error(resData.message);
+                }
+            }
+        }
+
+        if (lastSuccess && trackerRecords.length > 0) {
             const timeStr = new Date().toLocaleTimeString();
             statusEl.textContent = `Nuvem: Sincronizado às ${timeStr}`;
+        } else if (trackerRecords.length === 0) {
+            statusEl.textContent = "Nuvem: Sem registos locais para enviar.";
         } else {
-            statusEl.textContent = "Nuvem: Falha ao processar.";
-            console.error(resData.error);
+            statusEl.textContent = "Nuvem: Sincronização parcial com erros.";
         }
     } catch (error) {
         statusEl.textContent = "Nuvem: Erro de ligação.";

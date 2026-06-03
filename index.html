@@ -550,7 +550,6 @@ async function loadTrackerData() {
         if (savedRecords && savedRecords.length > 0) {
             trackerRecords = savedRecords;
         } else {
-            // Valores default em código removidos para iniciar vazio caso o IndexedDB não tenha dados criados.
             trackerRecords = [];
         }
     } catch (err) { console.error(err); }
@@ -789,7 +788,6 @@ function autoSync() {
     const statusEl = document.getElementById('syncStatus');
     statusEl.textContent = "Nuvem: Alterações pendentes...";
     if (syncTimeout) clearTimeout(syncTimeout);
-    // Dispara a sincronização automática após 2 segundos de inatividade de ações
     syncTimeout = setTimeout(syncWithGoogleDrive, 2000);
 }
 
@@ -811,10 +809,10 @@ async function syncWithGoogleDrive() {
             records: trackerRecords
         };
 
-        // Envio via fetch (método POST com tratamento de redirecionamento nativo do Apps Script)
         const response = await fetch(SCRIPT_URL, {
             method: "POST",
             mode: "cors",
+            redirect: "follow",
             headers: {
                 "Content-Type": "text/plain;charset=utf-8"
             },
